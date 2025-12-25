@@ -1,59 +1,67 @@
 # ko&clo 쇼핑몰 기술 문서
 
-**Version 1.0** | **2025-12-22**
+**Version 2.1** | **2025-12-25**
 
 ---
 
-## 📁 폴더 구조
+## 폴더 구조
 
 ```
-docs_markdown/
-├── README.md                    # 이 파일
-├── TDD/
-│   └── Shopping_Mall_TDD_v8.md  # Technical Design Document
-├── PRD/
-│   ├── PRD_비즈니스의사결정.md   # 핵심 의사결정 정리
-│   ├── PRD-001_상품목록조회.md   # 상품 목록/검색 조회
-│   ├── PRD-002_상품상세조회.md   # 상품 상세 (PDP)
-│   ├── PRD-003_상품등록.md       # 상품 등록 (Admin)
-│   ├── PRD-004_상품수정.md       # 상품 수정 (Admin)
-│   ├── PRD-005_상품삭제.md       # 상품 삭제 (Admin)
-│   ├── PRD-006_재고관리.md       # 재고 관리 (Admin)
-│   └── PRD-007_카테고리관리.md   # 카테고리 관리 (Admin)
-└── diagrams/
-    ├── prd001_sequence_v2.png    # 상품 목록 조회 시퀀스
-    ├── prd001_flow.png           # 상품 목록 플로우
-    ├── prd002_sequence.png       # 상품 상세 조회 시퀀스
-    ├── prd003_sequence.png       # 상품 등록 시퀀스
-    └── prd004_sequence.png       # 상품 수정 시퀀스
+shopping/
+├── README.md                           # 본 문서
+├── PRD/                                # Product Requirements Document
+│   ├── Shopping_Mall_PRD.md            # 메인 PRD (개요)
+│   ├── MBR_회원관리.md                  # 회원관리 요구사항
+│   ├── PRD_상품관리.md                  # 상품관리 요구사항
+│   ├── CART_장바구니.md                 # 장바구니 요구사항 (TBD)
+│   ├── ORD_주문결제.md                  # 주문/결제 요구사항 (TBD)
+│   ├── SHP_배송.md                     # 배송 요구사항 (TBD)
+│   ├── CS_고객센터.md                   # 고객센터/리뷰 요구사항 (TBD)
+│   └── PROMO_프로모션.md                # 프로모션 요구사항 (TBD)
+└── TDD/                                # Technical Design Document
+    ├── Shopping_Mall_TDD.md            # 메인 TDD (개요)
+    ├── MBR_회원관리.md                  # 회원관리 기술 명세
+    ├── PRD_상품관리.md                  # 상품관리 기술 명세
+    ├── PRIVACY_개인정보처리명세.md      # 개인정보 처리 정책
+    ├── AUTH_인증흐름.md                 # 인증/세션 관리
+    ├── PAYMENT_결제흐름.md              # 결제 처리
+    ├── DATABASE_설계.md                 # DB ERD 및 스키마
+    └── INFRA_배포전략.md                # 인프라/CI/CD/비용
 ```
 
 ---
 
-## 📄 문서 목록
-
-### TDD (Technical Design Document)
-
-| 문서 | 설명 | 버전 |
-|------|------|------|
-| [Shopping_Mall_TDD_v8.md](TDD/Shopping_Mall_TDD_v8.md) | 전체 기술 설계 문서 | v1.8 |
+## 문서 목록
 
 ### PRD (Product Requirements Document)
 
-| 문서 | 설명 | 사용자 |
-|------|------|--------|
-| [PRD_비즈니스의사결정.md](PRD/PRD_비즈니스의사결정.md) | 8개 핵심 의사결정 | - |
-| [PRD-001_상품목록조회.md](PRD/PRD-001_상품목록조회.md) | PLP/SRP 통합 조회 | Consumer |
-| [PRD-002_상품상세조회.md](PRD/PRD-002_상품상세조회.md) | PDP 상세 페이지 | Consumer |
-| [PRD-003_상품등록.md](PRD/PRD-003_상품등록.md) | 상품 등록 | Admin |
-| [PRD-004_상품수정.md](PRD/PRD-004_상품수정.md) | 상품 수정 | Admin |
-| [PRD-005_상품삭제.md](PRD/PRD-005_상품삭제.md) | 상품 삭제 (Soft Delete) | Admin |
-| [PRD-006_재고관리.md](PRD/PRD-006_재고관리.md) | 재고 관리/동기화 | Admin |
-| [PRD-007_카테고리관리.md](PRD/PRD-007_카테고리관리.md) | 카테고리 CRUD | Admin |
+| 문서 | 상태 | 설명 |
+|------|------|------|
+| [Shopping_Mall_PRD.md](PRD/Shopping_Mall_PRD.md) | 정의됨 | 전체 요구사항 개요, 비즈니스 목표, 로드맵 |
+| [MBR_회원관리.md](PRD/MBR_회원관리.md) | 정의됨 | 회원가입/로그인/탈퇴 등 회원 기능 요구사항 |
+| [PRD_상품관리.md](PRD/PRD_상품관리.md) | 정의됨 | 상품 목록/상세/등록/수정/삭제, 재고, 카테고리 |
+| [CART_장바구니.md](PRD/CART_장바구니.md) | TBD | 장바구니 담기/수정/삭제, 비회원 장바구니 |
+| [ORD_주문결제.md](PRD/ORD_주문결제.md) | TBD | 주문서 작성, 결제, 취소/환불 |
+| [SHP_배송.md](PRD/SHP_배송.md) | TBD | 배송 정책, 배송 조회, 교환/반품 |
+| [CS_고객센터.md](PRD/CS_고객센터.md) | TBD | FAQ, 1:1 문의, 공지사항, 리뷰/평점 |
+| [PROMO_프로모션.md](PRD/PROMO_프로모션.md) | TBD | 쿠폰, 포인트, 기획전, 알림 |
+
+### TDD (Technical Design Document)
+
+| 문서 | 설명 |
+|------|------|
+| [Shopping_Mall_TDD.md](TDD/Shopping_Mall_TDD.md) | 전체 기술 설계 개요, 아키텍처, 기술 스택 |
+| [MBR_회원관리.md](TDD/MBR_회원관리.md) | 회원가입/로그인/탈퇴 등 전체 회원 기능 |
+| [PRD_상품관리.md](TDD/PRD_상품관리.md) | 상품 목록/상세/등록/수정/삭제, 재고, 카테고리 |
+| [PRIVACY_개인정보처리명세.md](TDD/PRIVACY_개인정보처리명세.md) | 개인정보 분류, 삭제 정책, 법적 보관 |
+| [AUTH_인증흐름.md](TDD/AUTH_인증흐름.md) | JWT 관리, 토큰 갱신, 권한 관리 |
+| [PAYMENT_결제흐름.md](TDD/PAYMENT_결제흐름.md) | PortOne 연동, 결제/환불 흐름 |
+| [DATABASE_설계.md](TDD/DATABASE_설계.md) | ERD, 테이블 DDL, RLS 정책 |
+| [INFRA_배포전략.md](TDD/INFRA_배포전략.md) | CI/CD, 환경 구성, 비용 분석 |
 
 ---
 
-## 🔗 핵심 비즈니스 의사결정
+## 핵심 비즈니스 의사결정
 
 | # | 의사결정 | 최종 결정 |
 |---|----------|-----------|
@@ -68,30 +76,74 @@ docs_markdown/
 
 ---
 
-## 🛠 기술 스택
+## 기술 스택
 
 | 구분 | 기술 |
 |------|------|
-| Frontend | SvelteKit, TypeScript, Tailwind CSS |
-| Backend | FastAPI, Python 3.11+, SQLAlchemy 2.0 |
+| Frontend | SvelteKit, TypeScript, Tailwind CSS, Zod |
+| Backend | FastAPI, Python 3.11+, SQLAlchemy 2.0, Pydantic v2 |
 | Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth (OAuth, JWT) |
 | Storage | Cloudflare R2 |
 | Payment | PortOne |
 | Hosting | Vercel (FE), Railway (BE) |
 
 ---
 
-## 📅 변경 이력
+## 시스템 아키텍처
+
+```mermaid
+flowchart TB
+    subgraph Client["Client"]
+        Browser["Browser / Mobile"]
+    end
+
+    subgraph Vercel["Vercel"]
+        SvelteKit["SvelteKit (SSR/BFF)"]
+    end
+
+    subgraph Railway["Railway"]
+        FastAPI["FastAPI"]
+    end
+
+    subgraph External["External Services"]
+        Supabase[("Supabase<br/>PostgreSQL + Auth")]
+        R2["Cloudflare R2"]
+        PortOne["PortOne (PG)"]
+    end
+
+    Browser --> SvelteKit
+    SvelteKit --> FastAPI
+    FastAPI --> Supabase & R2 & PortOne
+    Browser --> Supabase
+```
+
+---
+
+## 문서 작성 원칙
+
+1. **모든 문서는 Markdown으로 작성**
+2. **대-기능 단위로 파일 분리** (회원관리, 상품관리 등)
+3. **중요 소주제는 별도 파일로 분리** (예: 개인정보처리)
+4. **모든 다이어그램은 Mermaid로 작성**
+   - 상태가 가정되는 경우 → StateDiagram
+   - Race Condition 발생 가능 시 → StateDiagram
+
+---
+
+## 변경 이력
 
 | 버전 | 날짜 | 변경 내용 |
 |------|------|-----------|
 | 1.0 | 2025-12-20 | 초기 버전 |
 | 1.6 | 2025-12-21 | 회원 관리 상세 추가 |
 | 1.8 | 2025-12-22 | 상품 관리 PRD 상세 추가 |
+| 2.0 | 2025-12-25 | 문서 구조 전면 개편 - 기능별 분리, Mermaid 적용 |
+| 2.1 | 2025-12-25 | PRD 폴더 추가, TDD와 분리 |
 
 ---
 
-## 📞 문의
+## 문의
 
 - 프로젝트: ko&clo 쇼핑몰
 - 담당: ko&clo 개발팀
