@@ -1,13 +1,13 @@
 # ko&clo 쇼핑몰 기술 문서
 
-**Version 2.1** | **2025-12-25**
+**Version 2.2** | **2025-12-26**
 
 ---
 
 ## 폴더 구조
 
 ```
-shopping/
+docs/shopping/
 ├── README.md                           # 본 문서
 ├── PRD/                                # Product Requirements Document
 │   ├── Shopping_Mall_PRD.md            # 메인 PRD (개요)
@@ -120,6 +120,46 @@ flowchart TB
 
 ---
 
+## GitBook 연동
+
+본 문서는 GitBook을 통해 웹으로 제공됩니다.
+
+### 브랜치 구조
+
+| 브랜치 | 용도 |
+|--------|------|
+| `main` | 개발 브랜치 (PR 머지 대상) |
+| `gitbook` | GitBook 연동 브랜치 (자동 동기화) |
+
+### 문서 수정 워크플로우
+
+```mermaid
+flowchart LR
+    subgraph TDD["TDD (개발자 주도)"]
+        T1["feature branch"] --> T2["PR to main"]
+        T2 --> T3["merge to main"]
+        T3 --> T4["auto sync to gitbook"]
+    end
+
+    subgraph PRD["PRD (비즈니스 검수 필요)"]
+        P1["feature branch"] --> P2["PR to main"]
+        P2 --> P3["merge to main"]
+        P3 --> P4["auto sync to gitbook"]
+        P4 --> P5["GitBook에서 검수/수정"]
+        P5 --> P6["gitbook → main PR"]
+    end
+```
+
+**TDD 흐름**: PR → main 머지 → gitbook 자동 동기화
+
+**PRD 흐름**:
+1. PR → main 머지 → gitbook 자동 동기화
+2. 비즈니스 담당자가 GitBook에서 직접 검수/수정
+3. GitBook 수정사항은 gitbook 브랜치에 커밋됨
+4. 필요 시 gitbook → main PR 생성하여 동기화
+
+---
+
 ## 문서 작성 원칙
 
 1. **모든 문서는 Markdown으로 작성**
@@ -140,6 +180,7 @@ flowchart TB
 | 1.8 | 2025-12-22 | 상품 관리 PRD 상세 추가 |
 | 2.0 | 2025-12-25 | 문서 구조 전면 개편 - 기능별 분리, Mermaid 적용 |
 | 2.1 | 2025-12-25 | PRD 폴더 추가, TDD와 분리 |
+| 2.2 | 2025-12-26 | docs/ 폴더로 이동, GitBook 연동 설정 |
 
 ---
 
