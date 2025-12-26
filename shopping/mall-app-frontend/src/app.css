@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+/* Pretendard 폰트 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+@layer base {
+	html {
+		font-family: 'Pretendard', sans-serif;
+	}
+}
+
+@layer components {
+	.btn-primary {
+		@apply px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors;
+	}
+
+	.btn-secondary {
+		@apply px-6 py-3 border border-black rounded-lg font-medium hover:bg-gray-50 transition-colors;
+	}
+
+	.input-field {
+		@apply w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black;
+	}
+}
