@@ -18,14 +18,30 @@
 <div>
 	<!-- 회원 정보 요약 -->
 	<div class="bg-gray-50 p-6 rounded-lg mb-8">
-		<div class="flex items-center gap-4">
-			<div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl">
-				{$authStore.user?.email?.charAt(0).toUpperCase() || '?'}
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-4">
+				<div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl overflow-hidden">
+					{#if $authStore.user?.user_metadata?.profile_image}
+						<img
+							src={$authStore.user.user_metadata.profile_image}
+							alt="프로필"
+							class="w-full h-full object-cover"
+						/>
+					{:else}
+						{$authStore.user?.email?.charAt(0).toUpperCase() || '?'}
+					{/if}
+				</div>
+				<div>
+					<p class="font-bold text-lg">{$authStore.user?.user_metadata?.name || '회원'}</p>
+					<p class="text-gray-500">{$authStore.user?.email}</p>
+				</div>
 			</div>
-			<div>
-				<p class="font-bold text-lg">{$authStore.user?.user_metadata?.name || '회원'}</p>
-				<p class="text-gray-500">{$authStore.user?.email}</p>
-			</div>
+			<a
+				href="/my/profile"
+				class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+			>
+				프로필 수정
+			</a>
 		</div>
 	</div>
 

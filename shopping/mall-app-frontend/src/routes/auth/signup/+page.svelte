@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase';
-	import { goto } from '$app/navigation';
+	import { getSupabase } from '$lib/supabase';
+	import { page } from '$app/stores';
 	import { signupSchema, type SignupInput } from '$lib/schemas/auth';
 
 	let formData = $state<Partial<SignupInput>>({
@@ -21,6 +21,12 @@
 	let successMessage = $state('');
 
 	async function handleSubmit() {
+		const supabase = getSupabase();
+		if (!supabase) {
+			errors.general = 'Supabase가 설정되지 않았습니다.';
+			return;
+		}
+
 		loading = true;
 		errors = {};
 
@@ -40,6 +46,7 @@
 			email: formData.email!,
 			password: formData.password!,
 			options: {
+				emailRedirectTo: `${$page.url.origin}/auth/callback`,
 				data: {
 					name: formData.name,
 					phone: formData.phone,
@@ -49,13 +56,32 @@
 		});
 
 		if (error) {
-			errors.general = error.message;
+			if (error.message.includes('already registered')) {
+				errors.general = '이미 가입된 이메일입니다.';
+			} else {
+				errors.general = error.message;
+			}
 			loading = false;
 			return;
 		}
 
 		successMessage = '가입 확인 이메일을 보냈습니다. 이메일을 확인해주세요.';
 		loading = false;
+	}
+
+	async function signUpWithSocial(provider: 'kakao' | 'naver' | 'google') {
+		const supabase = getSupabase();
+		if (!supabase) {
+			errors.general = 'Supabase가 설정되지 않았습니다.';
+			return;
+		}
+
+		await supabase.auth.signInWithOAuth({
+			provider,
+			options: {
+				redirectTo: `${$page.url.origin}/auth/callback`
+			}
+		});
 	}
 </script>
 
@@ -65,6 +91,37 @@
 
 <div class="max-w-md mx-auto mt-16 p-6">
 	<h1 class="text-2xl font-bold text-center mb-8">회원가입</h1>
+
+	<!-- 소셜 로그인 버튼 -->
+	<div class="space-y-3 mb-8">
+		<button
+			onclick={() => signUpWithSocial('kakao')}
+			class="w-full py-3 bg-[#FEE500] text-black rounded-lg font-medium hover:bg-[#e6cf00] transition-colors"
+		>
+			카카오로 시작하기
+		</button>
+		<button
+			onclick={() => signUpWithSocial('naver')}
+			class="w-full py-3 bg-[#03C75A] text-white rounded-lg font-medium hover:bg-[#02b350] transition-colors"
+		>
+			네이버로 시작하기
+		</button>
+		<button
+			onclick={() => signUpWithSocial('google')}
+			class="w-full py-3 bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+		>
+			Google로 시작하기
+		</button>
+	</div>
+
+	<div class="relative my-6">
+		<hr class="border-gray-200" />
+		<span
+			class="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-gray-400 text-sm"
+		>
+			또는 이메일로 가입
+		</span>
+	</div>
 
 	{#if successMessage}
 		<div class="p-4 bg-green-50 text-green-600 rounded-lg text-center mb-6">

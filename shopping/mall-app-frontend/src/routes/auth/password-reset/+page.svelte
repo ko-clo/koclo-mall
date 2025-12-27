@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase';
+	import { getSupabase } from '$lib/supabase';
+	import { page } from '$app/stores';
 
 	let email = $state('');
 	let loading = $state(false);
@@ -7,18 +8,25 @@
 	let error = $state('');
 
 	async function handleSubmit() {
+		const supabase = getSupabase();
+		if (!supabase) {
+			error = 'Supabase가 설정되지 않았습니다.';
+			return;
+		}
+
 		loading = true;
 		error = '';
 		message = '';
 
 		const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${window.location.origin}/auth/update-password`
+			redirectTo: `${$page.url.origin}/auth/update-password`
 		});
 
 		if (resetError) {
 			error = resetError.message;
 		} else {
-			message = '비밀번호 재설정 링크를 이메일로 보냈습니다.';
+			// 보안상 이메일 존재 여부와 관계없이 동일한 메시지 표시
+			message = '비밀번호 재설정 링크를 이메일로 보냈습니다. 이메일을 확인해주세요.';
 		}
 
 		loading = false;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase';
+	import { getSupabase } from '$lib/supabase';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -11,6 +11,12 @@
 	const redirectTo = $page.url.searchParams.get('redirect') || '/';
 
 	async function signInWithEmail() {
+		const supabase = getSupabase();
+		if (!supabase) {
+			error = 'Supabase가 설정되지 않았습니다.';
+			return;
+		}
+
 		loading = true;
 		error = '';
 
@@ -20,7 +26,13 @@
 		});
 
 		if (authError) {
-			error = authError.message;
+			if (authError.message.includes('Invalid login credentials')) {
+				error = '이메일 또는 비밀번호가 일치하지 않습니다.';
+			} else if (authError.message.includes('Email not confirmed')) {
+				error = '이메일 인증이 완료되지 않았습니다. 이메일을 확인해주세요.';
+			} else {
+				error = authError.message;
+			}
 			loading = false;
 			return;
 		}
@@ -28,7 +40,13 @@
 		goto(redirectTo);
 	}
 
-	async function signInWithSocial(provider: 'kakao' | 'google') {
+	async function signInWithSocial(provider: 'kakao' | 'naver' | 'google') {
+		const supabase = getSupabase();
+		if (!supabase) {
+			error = 'Supabase가 설정되지 않았습니다.';
+			return;
+		}
+
 		await supabase.auth.signInWithOAuth({
 			provider,
 			options: {
@@ -52,6 +70,12 @@
 			class="w-full py-3 bg-[#FEE500] text-black rounded-lg font-medium hover:bg-[#e6cf00] transition-colors"
 		>
 			카카오로 시작하기
+		</button>
+		<button
+			onclick={() => signInWithSocial('naver')}
+			class="w-full py-3 bg-[#03C75A] text-white rounded-lg font-medium hover:bg-[#02b350] transition-colors"
+		>
+			네이버로 시작하기
 		</button>
 		<button
 			onclick={() => signInWithSocial('google')}
