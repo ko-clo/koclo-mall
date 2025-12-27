@@ -27,15 +27,15 @@
 	let selectedSize = $state('');
 	let quantity = $state(1);
 
-	$: availableSizes = product.options
-		.filter((opt) => opt.color === selectedColor)
-		.map((opt) => opt.size);
-
-	$: selectedOption = product.options.find(
-		(opt) => opt.color === selectedColor && opt.size === selectedSize
+	let availableSizes = $derived(
+		product.options.filter((opt) => opt.color === selectedColor).map((opt) => opt.size)
 	);
 
-	$: uniqueColors = [...new Set(product.options.map((o) => o.color))];
+	let selectedOption = $derived(
+		product.options.find((opt) => opt.color === selectedColor && opt.size === selectedSize)
+	);
+
+	let uniqueColors = $derived([...new Set(product.options.map((o) => o.color))]);
 
 	function selectColor(color: string) {
 		selectedColor = color;
