@@ -909,9 +909,9 @@ erDiagram
     }
 
     order_items {
-        uuid id PK
+        serial id PK
         uuid order_id FK
-        uuid product_option_id FK
+        int product_option_id FK
         string product_name
         string option_color
         string option_size
@@ -921,7 +921,7 @@ erDiagram
     }
 
     payments {
-        uuid id PK
+        serial id PK
         uuid order_id FK
         string imp_uid UK
         string merchant_uid UK
@@ -935,8 +935,8 @@ erDiagram
     }
 
     product_options {
-        uuid id PK
-        uuid product_id FK
+        serial id PK
+        int product_id FK
         string color
         string size
         int price
@@ -1008,9 +1008,9 @@ CREATE POLICY "orders_select_own"
 
 ```sql
 CREATE TABLE order_items (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_option_id UUID NOT NULL REFERENCES product_options(id),
+    product_option_id INTEGER NOT NULL REFERENCES product_options(id),
 
     -- 주문 시점 스냅샷 (상품 정보 변경에 영향받지 않음)
     product_name VARCHAR(200) NOT NULL,
@@ -1033,7 +1033,7 @@ CREATE INDEX idx_order_items_order ON order_items(order_id);
 
 ```sql
 CREATE TABLE payments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
 
     -- PortOne 정보

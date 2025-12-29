@@ -37,9 +37,16 @@
 |------|------|------|
 | 테이블 | snake_case, 복수형 | members, orders |
 | 컬럼 | snake_case | created_at, order_status |
-| PK | id (UUID) | id |
+| PK | id (타입은 아래 참조) | id |
 | FK | {table}_id | member_id, product_id |
 | 인덱스 | idx_{table}_{columns} | idx_orders_member_id |
+
+### 1.3 PK 타입 정책
+
+| 조건 | PK 타입 | 대상 테이블 |
+|------|---------|-------------|
+| 개인정보 보호 필요 (URL 노출 시 타인 정보 접근 방지) | UUID | members, addresses, orders, cart_items |
+| 공개 정보 또는 내부용 | SERIAL | categories, products, product_options, product_images, order_items, payments |
 
 ---
 
@@ -235,8 +242,8 @@ CREATE INDEX idx_addresses_default ON addresses(member_id, is_default) WHERE is_
 ```mermaid
 erDiagram
     categories {
-        uuid id PK
-        uuid parent_id FK
+        serial id PK
+        int parent_id FK
         varchar name
         varchar slug
         int sort_order
@@ -245,8 +252,8 @@ erDiagram
     }
 
     products {
-        uuid id PK
-        uuid category_id FK
+        serial id PK
+        int category_id FK
         varchar name
         varchar slug
         varchar short_description
@@ -262,8 +269,8 @@ erDiagram
     }
 
     product_options {
-        uuid id PK
-        uuid product_id FK
+        serial id PK
+        int product_id FK
         varchar sku
         varchar color
         varchar size
@@ -275,8 +282,8 @@ erDiagram
     }
 
     product_images {
-        uuid id PK
-        uuid product_id FK
+        serial id PK
+        int product_id FK
         varchar url
         varchar alt_text
         boolean is_thumbnail
@@ -294,8 +301,8 @@ erDiagram
 
 ```sql
 CREATE TABLE categories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+    id SERIAL PRIMARY KEY,
+    parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
     name VARCHAR(50) NOT NULL,
     slug VARCHAR(100) NOT NULL UNIQUE,
     sort_order INTEGER DEFAULT 0,
@@ -313,8 +320,8 @@ CREATE INDEX idx_categories_active ON categories(is_active) WHERE is_active = tr
 
 ```sql
 CREATE TABLE products (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+    id SERIAL PRIMARY KEY,
+    category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(150) NOT NULL UNIQUE,
     short_description VARCHAR(200),
@@ -344,8 +351,8 @@ CREATE INDEX idx_products_created ON products(created_at DESC);
 
 ```sql
 CREATE TABLE product_options (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     sku VARCHAR(50) NOT NULL UNIQUE,
     color VARCHAR(30) NOT NULL,
     size VARCHAR(20) NOT NULL,
@@ -367,8 +374,8 @@ CREATE INDEX idx_product_options_stock ON product_options(product_id, stock_quan
 
 ```sql
 CREATE TABLE product_images (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     url VARCHAR(500) NOT NULL,
     alt_text VARCHAR(200),
     is_thumbnail BOOLEAN DEFAULT FALSE,
@@ -416,9 +423,9 @@ erDiagram
     }
 
     order_items {
-        uuid id PK
+        serial id PK
         uuid order_id FK
-        uuid product_option_id FK
+        int product_option_id FK
         varchar product_name
         varchar option_name
         int quantity
@@ -428,7 +435,7 @@ erDiagram
     }
 
     payments {
-        uuid id PK
+        serial id PK
         uuid order_id FK
         varchar imp_uid
         varchar merchant_uid
@@ -443,7 +450,7 @@ erDiagram
     cart_items {
         uuid id PK
         uuid member_id FK
-        uuid product_option_id FK
+        int product_option_id FK
         int quantity
         timestamp created_at
         timestamp updated_at
@@ -491,9 +498,9 @@ CREATE INDEX idx_orders_date ON orders(ordered_at DESC);
 
 ```sql
 CREATE TABLE order_items (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_option_id UUID REFERENCES product_options(id) ON DELETE SET NULL,
+    product_option_id INTEGER REFERENCES product_options(id) ON DELETE SET NULL,
     product_name VARCHAR(100) NOT NULL,
     option_name VARCHAR(100) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
@@ -510,7 +517,7 @@ CREATE INDEX idx_order_items_order ON order_items(order_id);
 
 ```sql
 CREATE TABLE payments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     order_id UUID NOT NULL UNIQUE REFERENCES orders(id),
     imp_uid VARCHAR(100) UNIQUE,
     merchant_uid VARCHAR(100) NOT NULL UNIQUE,
@@ -535,7 +542,7 @@ CREATE INDEX idx_payments_merchant ON payments(merchant_uid);
 CREATE TABLE cart_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    product_option_id UUID NOT NULL REFERENCES product_options(id) ON DELETE CASCADE,
+    product_option_id INTEGER NOT NULL REFERENCES product_options(id) ON DELETE CASCADE,
     quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -674,3 +681,4 @@ CREATE POLICY "categories_select_active"
 | 버전 | 날짜 | 변경 내용 |
 |------|------|-----------|
 | 1.0 | 2025-12-25 | TDD v1.6 내용 기반 초기 작성 |
+| 1.1 | 2025-12-29 | PK 타입 정책 추가 (UUID vs SERIAL), 상품/주문 도메인 PK 타입 변경 |

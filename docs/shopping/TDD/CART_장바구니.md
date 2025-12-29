@@ -615,15 +615,15 @@ erDiagram
     cart_items {
         uuid id PK
         uuid member_id FK
-        uuid product_option_id FK
+        int product_option_id FK
         int quantity
         timestamp created_at
         timestamp updated_at
     }
 
     product_options {
-        uuid id PK
-        uuid product_id FK
+        serial id PK
+        int product_id FK
         string color
         string size
         int price
@@ -632,7 +632,7 @@ erDiagram
     }
 
     products {
-        uuid id PK
+        serial id PK
         string name
         string thumbnail_url
         boolean is_deleted
@@ -647,7 +647,7 @@ erDiagram
 CREATE TABLE cart_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    product_option_id UUID NOT NULL REFERENCES product_options(id) ON DELETE CASCADE,
+    product_option_id INTEGER NOT NULL REFERENCES product_options(id) ON DELETE CASCADE,
     quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
