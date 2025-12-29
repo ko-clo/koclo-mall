@@ -43,6 +43,12 @@
 	let showSkuWarning = $state(false);
 	let showSlugWarning = $state(false);
 
+	// 삭제 관련
+	let showDeleteModal = $state(false);
+	let deleteCheckLoading = $state(false);
+	let deleteError = $state<string | null>(null);
+	let pendingOrderCount = $state(0);
+
 	// 상품 데이터 로드
 	$effect(() => {
 		if (product) {
@@ -193,6 +199,40 @@
 
 		// TODO: API 호출
 		alert('상품이 수정되었습니다. (Mock)');
+		goto('/admin/products');
+	}
+
+	// 삭제 가능 여부 확인
+	async function checkDeleteAvailable() {
+		deleteCheckLoading = true;
+		deleteError = null;
+		pendingOrderCount = 0;
+
+		// TODO: 실제 API 호출로 대체
+		// GET /api/v1/admin/products/{id}/delete-check
+		await new Promise(resolve => setTimeout(resolve, 500));
+
+		// Mock: 랜덤하게 미완료 주문 있음/없음 시뮬레이션 (실제로는 항상 삭제 가능하게)
+		const hasPendingOrders = false; // 실제 API 연동 시 변경
+
+		if (hasPendingOrders) {
+			pendingOrderCount = 3;
+			deleteError = '미완료 주문이 있어 삭제할 수 없습니다';
+		}
+
+		deleteCheckLoading = false;
+		showDeleteModal = true;
+	}
+
+	// 상품 삭제 실행
+	async function handleDelete() {
+		if (deleteError) return;
+
+		// TODO: 실제 API 호출로 대체
+		// DELETE /api/v1/admin/products/{id}
+		await new Promise(resolve => setTimeout(resolve, 300));
+
+		alert('상품이 삭제되었습니다.');
 		goto('/admin/products');
 	}
 
@@ -641,13 +681,14 @@
 				<button
 					type="button"
 					class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-					onclick={() => {
-						if (confirm('이 상품을 삭제하시겠습니까?')) {
-							alert('삭제 기능은 준비 중입니다. (Mock)');
-						}
-					}}
+					onclick={checkDeleteAvailable}
+					disabled={deleteCheckLoading}
 				>
-					상품 삭제
+					{#if deleteCheckLoading}
+						확인 중...
+					{:else}
+						상품 삭제
+					{/if}
 				</button>
 				<div class="flex gap-3">
 					<a href="/admin/products" class="btn-secondary">취소</a>
@@ -684,6 +725,61 @@
 						계속 진행
 					</button>
 				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- 삭제 확인 모달 -->
+	{#if showDeleteModal}
+		<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+			<div class="bg-white rounded-lg p-6 max-w-md mx-4">
+				{#if deleteError}
+					<!-- 삭제 불가 -->
+					<div class="text-center">
+						<div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<span class="text-red-600 text-2xl">!</span>
+						</div>
+						<h3 class="text-lg font-bold mb-2">삭제할 수 없습니다</h3>
+						<p class="text-gray-600 mb-2">{deleteError}</p>
+						{#if pendingOrderCount > 0}
+							<p class="text-sm text-gray-500 mb-4">
+								미완료 주문 {pendingOrderCount}건이 존재합니다.
+							</p>
+						{/if}
+						<button
+							class="btn-primary w-full"
+							onclick={() => (showDeleteModal = false)}
+						>
+							확인
+						</button>
+					</div>
+				{:else}
+					<!-- 삭제 확인 -->
+					<div class="text-center">
+						<div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+							<span class="text-amber-600 text-2xl">?</span>
+						</div>
+						<h3 class="text-lg font-bold mb-2">상품을 삭제하시겠습니까?</h3>
+						<p class="text-gray-600 mb-4">
+							삭제된 상품은 목록에서 숨겨지며,<br />
+							관리자 페이지에서 복구할 수 있습니다.
+						</p>
+						<div class="flex gap-3">
+							<button
+								class="btn-secondary flex-1"
+								onclick={() => (showDeleteModal = false)}
+							>
+								취소
+							</button>
+							<button
+								class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+								onclick={handleDelete}
+							>
+								삭제
+							</button>
+						</div>
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/if}

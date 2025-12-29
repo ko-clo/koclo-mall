@@ -11,6 +11,8 @@ export interface Product {
 	description: string;
 	is_sold_out: boolean;
 	is_new: boolean;
+	is_deleted: boolean;
+	deleted_at?: string;
 	category: { id: string; name: string; slug: string };
 	options: ProductOption[];
 }
@@ -42,6 +44,7 @@ export const mockProducts: Product[] = [
 		description: '<p>프리미엄 캐시미어 블렌드 소재로 제작된 오버핏 니트입니다.</p>',
 		is_sold_out: false,
 		is_new: true,
+		is_deleted: false,
 		category: { id: 'cat-1', name: '니트', slug: 'top/knit' },
 		options: [
 			{ id: 'opt-1-1', sku: 'KNC-BLK-S', color: 'Black', size: 'S', stock_quantity: 10, additional_price: 0 },
@@ -68,6 +71,7 @@ export const mockProducts: Product[] = [
 		description: '<p>고급 울 블렌드 소재의 클래식 롱 코트입니다.</p>',
 		is_sold_out: false,
 		is_new: false,
+		is_deleted: false,
 		category: { id: 'cat-2', name: '코트', slug: 'outer/coat' },
 		options: [
 			{ id: 'opt-2-1', sku: 'WLC-BLK-M', color: 'Black', size: 'M', stock_quantity: 5, additional_price: 0 },
@@ -91,6 +95,7 @@ export const mockProducts: Product[] = [
 		description: '<p>편안한 착용감의 와이드 핏 데님 팬츠입니다.</p>',
 		is_sold_out: false,
 		is_new: true,
+		is_deleted: false,
 		category: { id: 'cat-3', name: '팬츠', slug: 'bottom/pants' },
 		options: [
 			{ id: 'opt-3-1', sku: 'WDP-BLU-S', color: 'Blue', size: 'S', stock_quantity: 20, additional_price: 0 },
@@ -114,6 +119,7 @@ export const mockProducts: Product[] = [
 		description: '<p>가볍고 따뜻한 크롭 기장의 패딩 자켓입니다.</p>',
 		is_sold_out: false,
 		is_new: false,
+		is_deleted: false,
 		category: { id: 'cat-4', name: '패딩', slug: 'outer/padding' },
 		options: [
 			{ id: 'opt-4-1', sku: 'CPJ-BLK-S', color: 'Black', size: 'S', stock_quantity: 8, additional_price: 0 },
@@ -137,6 +143,7 @@ export const mockProducts: Product[] = [
 		description: '<p>깔끔한 스트라이프 패턴의 오버핏 셔츠입니다.</p>',
 		is_sold_out: false,
 		is_new: true,
+		is_deleted: false,
 		category: { id: 'cat-5', name: '셔츠', slug: 'top/shirt' },
 		options: [
 			{ id: 'opt-5-1', sku: 'SOS-BLU-M', color: 'Blue', size: 'M', stock_quantity: 15, additional_price: 0 },
@@ -158,6 +165,8 @@ export const mockProducts: Product[] = [
 		description: '<p>부드러운 플리스 소재의 집업 자켓입니다.</p>',
 		is_sold_out: true,
 		is_new: false,
+		is_deleted: true,
+		deleted_at: '2025-12-28T10:00:00Z',
 		category: { id: 'cat-6', name: '자켓', slug: 'outer/jacket' },
 		options: [
 			{ id: 'opt-6-1', sku: 'FZJ-CRM-M', color: 'Cream', size: 'M', stock_quantity: 0, additional_price: 0 },
@@ -179,6 +188,7 @@ export const mockProducts: Product[] = [
 		description: '<p>고급 울 소재의 머플러입니다.</p>',
 		is_sold_out: false,
 		is_new: false,
+		is_deleted: false,
 		category: { id: 'cat-7', name: '머플러', slug: 'acc/muffler' },
 		options: [
 			{ id: 'opt-7-1', sku: 'WMF-GRY-F', color: 'Gray', size: 'Free', stock_quantity: 30, additional_price: 0 },
@@ -200,6 +210,7 @@ export const mockProducts: Product[] = [
 		description: '<p>실용적인 사이즈의 레더 토트백입니다.</p>',
 		is_sold_out: false,
 		is_new: true,
+		is_deleted: false,
 		category: { id: 'cat-8', name: '가방', slug: 'acc/bag' },
 		options: [
 			{ id: 'opt-8-1', sku: 'LTB-BLK-F', color: 'Black', size: 'Free', stock_quantity: 20, additional_price: 0 },
