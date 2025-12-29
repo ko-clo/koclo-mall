@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import hello
+from app.features.member import router as member_router
 from app.core.config import settings
 from app.core.exceptions import AppException
 from app.core.logging import get_logger, setup_logging
@@ -40,10 +41,10 @@ app.add_middleware(
 # Exception handlers
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
+    content = {"detail": exc.detail}
+    if exc.code:
+        content["code"] = exc.code
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 
 @app.exception_handler(Exception)
@@ -57,6 +58,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 # Routes
 app.include_router(hello.router, prefix="/api/v1", tags=["hello"])
+app.include_router(member_router, prefix="/api", tags=["member"])
 
 
 @app.get("/health")
