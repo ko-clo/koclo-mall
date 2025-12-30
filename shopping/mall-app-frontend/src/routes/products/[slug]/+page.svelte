@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getProductBySlug, formatPrice, type ProductOption } from '$lib/data/products';
+	import { cartStore, triggerCartAnimation } from '$lib/stores/cart';
+	import { toastStore } from '$lib/stores/toast';
 
 	let slug = $derived($page.params.slug);
 	let product = $derived(getProductBySlug(slug));
@@ -9,6 +11,9 @@
 	let selectedSize = $state<string | null>(null);
 	let quantity = $state(1);
 	let currentImageIndex = $state(0);
+	let showOptionHint = $state(false);
+	let isAddingToCart = $state(false);
+	let addToCartSuccess = $state(false);
 
 	let availableColors = $derived(() => {
 		if (!product) return [];
@@ -50,12 +55,37 @@
 		}
 	}
 
-	function addToCart() {
-		if (!selectedOption()) {
-			alert('옵션을 선택해주세요.');
+	async function addToCart() {
+		if (isAddingToCart) return;
+
+		const option = selectedOption();
+		if (!option) {
+			showOptionHint = true;
 			return;
 		}
-		alert(`장바구니에 추가되었습니다.\n${product?.name}\n${selectedColor} / ${selectedSize} x ${quantity}`);
+
+		showOptionHint = false;
+		isAddingToCart = true;
+
+		try {
+			const result = await cartStore.addItem(option.id, quantity);
+
+			if (result.success) {
+				addToCartSuccess = true;
+				triggerCartAnimation();
+				toastStore.success(result.message, {
+					label: '장바구니 보기',
+					href: '/cart'
+				});
+				setTimeout(() => {
+					addToCartSuccess = false;
+				}, 1500);
+			} else {
+				toastStore.error(result.message);
+			}
+		} finally {
+			isAddingToCart = false;
+		}
 	}
 
 	function buyNow() {
@@ -120,13 +150,17 @@
 				</div>
 
 				<div class="border-t pt-6 space-y-4">
+					{#if showOptionHint && !selectedOption()}
+						<p class="text-sm text-red-500 font-medium">옵션을 선택해주세요.</p>
+					{/if}
+
 					<div>
-						<p class="text-sm font-medium mb-2">색상</p>
+						<p class="text-sm font-medium mb-2">색상 {#if showOptionHint && !selectedColor}<span class="text-red-500">*</span>{/if}</p>
 						<div class="flex flex-wrap gap-2">
 							{#each availableColors() as color}
 								<button
-									class="px-4 py-2 border rounded-lg transition-colors {selectedColor === color ? 'border-black bg-black text-white' : 'border-gray-300 hover:border-gray-400'}"
-									onclick={() => selectColor(color)}
+									class="px-4 py-2 border rounded-lg transition-colors {selectedColor === color ? 'border-black bg-black text-white' : showOptionHint && !selectedColor ? 'border-red-300 hover:border-red-400' : 'border-gray-300 hover:border-gray-400'}"
+									onclick={() => { selectColor(color); showOptionHint = false; }}
 								>
 									{color}
 								</button>
@@ -136,12 +170,12 @@
 
 					{#if selectedColor}
 						<div>
-							<p class="text-sm font-medium mb-2">사이즈</p>
+							<p class="text-sm font-medium mb-2">사이즈 {#if showOptionHint && !selectedSize}<span class="text-red-500">*</span>{/if}</p>
 							<div class="flex flex-wrap gap-2">
 								{#each availableSizes() as { size, stock }}
 									<button
-										class="px-4 py-2 border rounded-lg transition-colors {selectedSize === size ? 'border-black bg-black text-white' : stock === 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 hover:border-gray-400'}"
-										onclick={() => selectSize(size, stock)}
+										class="px-4 py-2 border rounded-lg transition-colors {selectedSize === size ? 'border-black bg-black text-white' : stock === 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : showOptionHint && !selectedSize ? 'border-red-300 hover:border-red-400' : 'border-gray-300 hover:border-gray-400'}"
+										onclick={() => { selectSize(size, stock); showOptionHint = false; }}
 										disabled={stock === 0}
 									>
 										{size}
@@ -191,14 +225,25 @@
 
 					<div class="grid grid-cols-2 gap-3">
 						<button
-							class="btn-secondary"
+							class="btn-secondary h-12 transition-colors duration-200 {addToCartSuccess ? '!bg-green-600 !text-white !border-green-600' : ''}"
 							onclick={addToCart}
-							disabled={product.is_sold_out}
+							disabled={product.is_sold_out || isAddingToCart}
 						>
-							장바구니
+							{#if isAddingToCart}
+								<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
+							{:else if addToCartSuccess}
+								<svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								</svg>
+							{:else}
+								장바구니
+							{/if}
 						</button>
 						<button
-							class="btn-primary"
+							class="btn-primary h-12"
 							onclick={buyNow}
 							disabled={product.is_sold_out}
 						>

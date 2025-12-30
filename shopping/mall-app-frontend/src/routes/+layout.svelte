@@ -5,6 +5,7 @@
 	import { authStore } from '$lib/stores/auth';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import Toast from '$lib/components/ui/Toast.svelte';
 	import '../app.css';
 
 	let { data, children } = $props();
@@ -60,3 +61,5 @@
 	</main>
 	<Footer />
 </div>
+
+<Toast />
