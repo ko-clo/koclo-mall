@@ -245,3 +245,13 @@ export function formatPrice(price: number): string {
 export function getProductBySlug(slug: string): Product | undefined {
 	return mockProducts.find(p => p.slug === slug);
 }
+
+export function getProductByOptionId(optionId: string): { product: Product; option: ProductOption } | undefined {
+	for (const product of mockProducts) {
+		const option = product.options.find(o => o.id === optionId);
+		if (option) {
+			return { product, option };
+		}
+	}
+	return undefined;
+}
