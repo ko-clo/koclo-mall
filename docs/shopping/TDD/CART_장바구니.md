@@ -1,6 +1,6 @@
 # 장바구니 (Shopping Cart)
 
-**Version 1.0** | **2025-12-26** | **ko&clo Project**
+**Version 1.1** | **2025-12-31** | **ko&clo Project**
 
 ---
 
@@ -11,10 +11,9 @@
 3. [CART-002 상품 추가](#3-cart-002-상품-추가)
 4. [CART-003 수량 변경](#4-cart-003-수량-변경)
 5. [CART-004 상품 제거](#5-cart-004-상품-제거)
-6. [CART-005 장바구니 비우기](#6-cart-005-장바구니-비우기)
-7. [비회원 장바구니](#7-비회원-장바구니)
-8. [데이터 모델](#8-데이터-모델)
-9. [변경 이력](#변경-이력)
+6. [비회원 장바구니](#6-비회원-장바구니)
+7. [데이터 모델](#7-데이터-모델)
+8. [변경 이력](#변경-이력)
 
 ---
 
@@ -31,8 +30,7 @@
 | CART-001 | 장바구니 조회 | Consumer | MVP | 담긴 상품 목록, 품절/가격 변동 표시 |
 | CART-002 | 상품 추가 | Consumer | MVP | 상품/옵션/수량 추가 |
 | CART-003 | 수량 변경 | Consumer | MVP | +/- 버튼으로 수량 조절 |
-| CART-004 | 상품 제거 | Consumer | MVP | 개별/선택 삭제 |
-| CART-005 | 장바구니 비우기 | Consumer | MVP | 전체 삭제 |
+| CART-004 | 상품 제거 | Consumer | MVP | 개별/선택/품절 삭제 |
 
 ### 1.2 장바구니 운영 정책
 
@@ -435,56 +433,14 @@ sequenceDiagram
 
 ---
 
-## 6. CART-005 장바구니 비우기
-
-| 항목 | 내용 |
-|------|------|
-| 기능 ID | CART-005 |
-| 기능명 | 장바구니 비우기 (Clear Cart) |
-| 사용자 유형 | Consumer |
-| 우선순위 | 필수 (MVP) |
+## 6. 비회원 장바구니
 
 > **하위 목차**
-> - [6.1 Flow](#61-flow)
-> - [6.2 API 명세](#62-api-명세)
+> - [6.1 로컬스토리지 구조](#61-로컬스토리지-구조)
+> - [6.2 SvelteKit 클라이언트 로직](#62-sveltekit-클라이언트-로직)
+> - [6.3 (향후) 병합 정책](#63-향후-병합-정책)
 
-### 6.1 Flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant U as User
-    participant SK as SvelteKit
-    participant API as FastAPI
-    participant DB as PostgreSQL
-
-    U->>SK: "전체 삭제" 클릭
-    SK->>U: 확인 모달 표시
-    U->>SK: 확인
-    SK->>API: DELETE /api/carts
-    API->>DB: DELETE cart_items WHERE member_id = ?
-    API-->>SK: 204 No Content
-    SK-->>U: 장바구니 비워짐
-```
-
-### 6.2 API 명세
-
-#### DELETE /api/carts
-
-전체 삭제
-
-**Response (204 No Content)**
-
----
-
-## 7. 비회원 장바구니
-
-> **하위 목차**
-> - [7.1 로컬스토리지 구조](#71-로컬스토리지-구조)
-> - [7.2 SvelteKit 클라이언트 로직](#72-sveltekit-클라이언트-로직)
-> - [7.3 (향후) 병합 정책](#73-향후-병합-정책)
-
-### 7.1 로컬스토리지 구조
+### 6.1 로컬스토리지 구조
 
 **Key**: `koclo_cart`
 
@@ -516,7 +472,7 @@ type GuestCart = GuestCartItem[];
 ]
 ```
 
-### 7.2 SvelteKit 클라이언트 로직
+### 6.2 SvelteKit 클라이언트 로직
 
 ```typescript
 // $lib/stores/guest-cart.ts (개념적 구조)
@@ -579,7 +535,7 @@ function clearGuestCart() {
 }
 ```
 
-### 7.3 (향후) 병합 정책
+### 6.3 (향후) 병합 정책
 
 **MVP 범위**: 비회원 장바구니와 회원 장바구니는 별개로 운영
 
@@ -592,13 +548,13 @@ function clearGuestCart() {
 
 ---
 
-## 8. 데이터 모델
+## 7. 데이터 모델
 
 > **하위 목차**
-> - [8.1 테이블 관계](#81-테이블-관계)
-> - [8.2 cart_items 테이블](#82-cart_items-테이블)
+> - [7.1 테이블 관계](#71-테이블-관계)
+> - [7.2 cart_items 테이블](#72-cart_items-테이블)
 
-### 8.1 테이블 관계
+### 7.1 테이블 관계
 
 ```mermaid
 erDiagram
@@ -639,7 +595,7 @@ erDiagram
     }
 ```
 
-### 8.2 cart_items 테이블
+### 7.2 cart_items 테이블
 
 > 참조: [DATABASE_설계.md](./DATABASE_설계.md) 섹션 5.5
 
@@ -678,3 +634,4 @@ CREATE POLICY "cart_items_all_own"
 | 버전 | 날짜 | 변경 내용 |
 |------|------|-----------|
 | 1.0 | 2025-12-26 | 초기 작성 |
+| 1.1 | 2025-12-31 | CART-005 장바구니 비우기 기능 제거 |
