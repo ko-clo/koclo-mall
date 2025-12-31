@@ -359,12 +359,21 @@
 						<span>총 결제 금액</span>
 						<span>{formatPrice(totalPrice + shippingFee)}</span>
 					</div>
-					<button
-						disabled={availableItems.length === 0}
-						class="block w-full mt-4 py-3 bg-black text-white text-center rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-					>
-						{availableItems.length > 0 ? `주문하기 (${availableItems.length})` : '주문할 상품이 없습니다'}
-					</button>
+					{#if availableItems.length > 0}
+						<a
+							href="/checkout"
+							class="block w-full mt-4 py-3 bg-black text-white text-center rounded-lg font-medium hover:bg-gray-800 transition-colors"
+						>
+							주문하기 ({availableItems.length})
+						</a>
+					{:else}
+						<button
+							disabled
+							class="block w-full mt-4 py-3 bg-gray-300 text-white text-center rounded-lg font-medium cursor-not-allowed"
+						>
+							주문할 상품이 없습니다
+						</button>
+					{/if}
 				</div>
 			</div>
 		</div>
