@@ -59,12 +59,12 @@ export const orderStatusLabels: Record<OrderStatus, string> = {
 };
 
 export const orderStatusColors: Record<OrderStatus, string> = {
-	PENDING: 'bg-yellow-100 text-yellow-800',
-	PAID: 'bg-blue-100 text-blue-800',
-	PREPARING: 'bg-purple-100 text-purple-800',
-	SHIPPING: 'bg-indigo-100 text-indigo-800',
-	DELIVERED: 'bg-green-100 text-green-800',
-	CANCELLED: 'bg-gray-100 text-gray-800'
+	PENDING: 'badge-pending',
+	PAID: 'badge-paid',
+	PREPARING: 'badge-preparing',
+	SHIPPING: 'badge-shipping',
+	DELIVERED: 'badge-delivered',
+	CANCELLED: 'badge-cancelled'
 };
 
 // Mock 주문 데이터

@@ -86,6 +86,27 @@
 		@apply bg-accent-secondary text-white;
 	}
 
+	/* Order Status Badges */
+	.badge-pending {
+		@apply bg-yellow-100 text-yellow-800;
+	}
+	.badge-paid {
+		background-color: #2563eb;
+		color: white;
+	}
+	.badge-preparing {
+		@apply bg-purple-100 text-purple-800;
+	}
+	.badge-shipping {
+		@apply bg-indigo-100 text-indigo-800;
+	}
+	.badge-delivered {
+		@apply bg-green-100 text-green-800;
+	}
+	.badge-cancelled {
+		@apply bg-gray-100 text-gray-800;
+	}
+
 	/* Section Container */
 	.section-container {
 		@apply max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12;
