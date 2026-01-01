@@ -28,6 +28,27 @@ export interface ProductOption {
 
 export const mockProducts: Product[] = [
 	{
+		id: '0',
+		name: '[테스트] 1000원 상품',
+		slug: 'test-1000won',
+		thumbnail_url: 'https://picsum.photos/seed/test1000/400/533',
+		images: [
+			{ id: '0-1', url: 'https://picsum.photos/seed/test1000/800/1066', is_thumbnail: true, sort_order: 1 }
+		],
+		original_price: 1000,
+		display_price: 1000,
+		discount_rate: 0,
+		short_description: '결제 테스트용 상품입니다',
+		description: '<p>결제 테스트용 상품입니다. 테스트 가맹점이라 실제 결제되지 않습니다.</p>',
+		is_sold_out: false,
+		is_new: true,
+		is_deleted: false,
+		category: { id: 'cat-test', name: '테스트', slug: 'test' },
+		options: [
+			{ id: 'opt-0-1', sku: 'TEST-1000', color: 'Free', size: 'Free', stock_quantity: 999, additional_price: 0 }
+		]
+	},
+	{
 		id: '1',
 		name: '오버핏 캐시미어 니트',
 		slug: 'overfit-cashmere-knit',

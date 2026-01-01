@@ -5,6 +5,42 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+
+	// PortOne SDK 로드 상태
+	let isSDKLoaded = $state(false);
+
+	onMount(() => {
+		// PortOne SDK 동적 로드
+		// @ts-ignore
+		if (window.IMP) {
+			console.log('PortOne SDK already loaded');
+			isSDKLoaded = true;
+			return;
+		}
+
+		const existingScript = document.querySelector('script[src*="iamport"]');
+		if (existingScript) {
+			// 스크립트는 있지만 아직 로드 중일 수 있음
+			existingScript.addEventListener('load', () => {
+				isSDKLoaded = true;
+			});
+			return;
+		}
+
+		const script = document.createElement('script');
+		script.src = 'https://cdn.iamport.kr/v1/iamport.js';
+		script.async = true;
+		script.onload = () => {
+			console.log('PortOne SDK loaded');
+			isSDKLoaded = true;
+		};
+		script.onerror = () => {
+			console.error('Failed to load PortOne SDK');
+			toastStore.error('결제 모듈을 불러오는데 실패했습니다.');
+		};
+		document.head.appendChild(script);
+	});
 
 	interface CheckoutItem {
 		product_option_id: string;
@@ -183,13 +219,45 @@
 		return true;
 	}
 
+	// 결제 진행 상태
+	let isProcessing = $state(false);
+
+	// merchant_uid 생성
+	function generateMerchantUid(): string {
+		const now = new Date();
+		const timestamp = now.toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+		const random = Math.random().toString(36).substring(2, 8);
+		return `ORD_${timestamp}_${random}`;
+	}
+
+	// 주문명 생성
+	function generateOrderName(): string {
+		if (checkoutItems.length === 0) return '';
+		const firstItem = checkoutItems[0];
+		if (checkoutItems.length === 1) {
+			return firstItem.product.name;
+		}
+		return `${firstItem.product.name} 외 ${checkoutItems.length - 1}건`;
+	}
+
 	// 결제하기
 	async function handlePayment() {
-		if (!validateForm()) return;
+		console.log('handlePayment called');
 
+		if (!validateForm()) {
+			console.log('Form validation failed');
+			return;
+		}
+		if (isProcessing) {
+			console.log('Already processing');
+			return;
+		}
+
+		console.log('Starting payment process');
+		isProcessing = true;
 		const finalMemo = shippingMemo === 'custom' ? customMemo : shippingMemo;
 
-		// TODO: 실제 결제 처리 (ORD-002에서 구현)
+		// 주문 데이터 준비
 		const orderData = {
 			items: checkoutItems,
 			orderer: {
@@ -213,8 +281,62 @@
 			}
 		};
 
-		console.log('Order data:', orderData);
-		toastStore.info('결제 기능은 준비 중입니다.');
+		const merchantUid = generateMerchantUid();
+
+		// @ts-ignore - PortOne SDK
+		console.log('Checking IMP:', window.IMP, 'isSDKLoaded:', isSDKLoaded);
+		if (!window.IMP || !isSDKLoaded) {
+			toastStore.error('결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+			isProcessing = false;
+			return;
+		}
+
+		// PortOne 초기화 (테스트 가맹점 코드)
+		// @ts-ignore
+		const IMP = window.IMP;
+		IMP.init('imp19424728'); // 테스트용 가맹점 코드
+		console.log('IMP initialized, calling request_pay');
+
+		// 결제 요청
+		IMP.request_pay(
+			{
+				pg: 'html5_inicis', // PG사
+				pay_method: 'card', // 결제수단
+				merchant_uid: merchantUid,
+				name: generateOrderName(),
+				amount: totalAmount,
+				buyer_email: ordererEmail,
+				buyer_name: ordererName,
+				buyer_tel: ordererPhone,
+				buyer_addr: `${address} ${addressDetail}`,
+				buyer_postcode: postalCode
+			},
+			async (response: any) => {
+				if (response.success) {
+					// 결제 성공 - 주문 완료 페이지로 이동
+					// 실제로는 서버에서 결제 검증 후 처리
+					const completedOrderData = {
+						...orderData,
+						orderNumber: merchantUid,
+						impUid: response.imp_uid,
+						paidAt: new Date().toISOString()
+					};
+
+					// 세션 스토리지에 주문 정보 저장
+					sessionStorage.setItem('completedOrder', JSON.stringify(completedOrderData));
+
+					// 장바구니 비우기
+					await cartStore.clear();
+
+					// 주문 완료 페이지로 이동
+					goto('/checkout/complete');
+				} else {
+					// 결제 실패/취소
+					toastStore.error(response.error_msg || '결제가 취소되었습니다.');
+					isProcessing = false;
+				}
+			}
+		);
 	}
 </script>
 
@@ -452,9 +574,18 @@
 			<!-- 결제하기 버튼 -->
 			<button
 				onclick={handlePayment}
-				class="w-full py-4 bg-black text-white text-center rounded-lg font-medium hover:bg-gray-800 transition-colors text-lg"
+				disabled={isProcessing}
+				class="w-full py-4 bg-black text-white text-center rounded-lg font-medium hover:bg-gray-800 transition-colors text-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 			>
-				{formatPrice(totalAmount)} 결제하기
+				{#if isProcessing}
+					<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					결제 진행 중...
+				{:else}
+					{formatPrice(totalAmount)} 결제하기
+				{/if}
 			</button>
 
 			<p class="text-xs text-gray-500 text-center">
