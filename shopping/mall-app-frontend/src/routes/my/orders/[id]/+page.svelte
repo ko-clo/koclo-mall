@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import {
 		getOrderById,
 		orderStatusLabels,
 		orderStatusColors,
 		formatOrderDateTime,
+		cancelOrder,
 		type Order
 	} from '$lib/data/orders';
 	import { formatPrice } from '$lib/data/products';
+	import { toastStore } from '$lib/stores/toast';
 
 	let id = $derived($page.params.id);
 	let order = $derived(id ? getOrderById(id) : undefined);
@@ -21,9 +24,58 @@
 			order?.shipping.tracking_number
 	);
 
-	function handleCancelOrder() {
-		if (confirm('주문을 취소하시겠습니까?')) {
-			alert('주문 취소 기능은 준비 중입니다.');
+	// 취소 모달 상태
+	let showCancelModal = $state(false);
+	let cancelReason = $state('');
+	let customReason = $state('');
+	let isCancelling = $state(false);
+
+	const cancelReasons = [
+		'단순 변심',
+		'상품 정보 상이',
+		'배송 지연',
+		'다른 상품 구매',
+		'기타'
+	];
+
+	function openCancelModal() {
+		showCancelModal = true;
+		cancelReason = '';
+		customReason = '';
+	}
+
+	function closeCancelModal() {
+		showCancelModal = false;
+		cancelReason = '';
+		customReason = '';
+	}
+
+	async function handleCancelOrder() {
+		if (!order) return;
+
+		if (!cancelReason) {
+			toastStore.error('취소 사유를 선택해주세요.');
+			return;
+		}
+
+		if (cancelReason === '기타' && !customReason.trim()) {
+			toastStore.error('취소 사유를 입력해주세요.');
+			return;
+		}
+
+		try {
+			isCancelling = true;
+			const reason = cancelReason === '기타' ? customReason : cancelReason;
+			await cancelOrder(order.id, reason);
+			toastStore.success('주문이 취소되었습니다.');
+			closeCancelModal();
+
+			// 페이지 새로고침하여 변경사항 반영
+			window.location.reload();
+		} catch (error) {
+			toastStore.error(error instanceof Error ? error.message : '주문 취소에 실패했습니다.');
+		} finally {
+			isCancelling = false;
 		}
 	}
 
@@ -87,7 +139,7 @@
 				{#if canCancel}
 					<button
 						class="flex-1 py-2 border border-red-500 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
-						onclick={handleCancelOrder}
+						onclick={openCancelModal}
 					>
 						주문 취소
 					</button>
@@ -207,8 +259,8 @@
 				<span class="text-lg">{formatPrice(order.amounts.total)}</span>
 			</div>
 
-			<!-- 결제/배송 일시 -->
-			{#if order.paid_at || order.shipped_at || order.delivered_at}
+			<!-- 결제/배송/취소 일시 -->
+			{#if order.paid_at || order.shipped_at || order.delivered_at || order.cancelled_at}
 				<div class="border-t mt-4 pt-4 space-y-2 text-sm">
 					{#if order.paid_at}
 						<div class="flex justify-between">
@@ -227,6 +279,18 @@
 							<span class="text-gray-500">배송완료</span>
 							<span>{formatOrderDateTime(order.delivered_at)}</span>
 						</div>
+					{/if}
+					{#if order.cancelled_at}
+						<div class="flex justify-between text-red-500">
+							<span>취소일시</span>
+							<span>{formatOrderDateTime(order.cancelled_at)}</span>
+						</div>
+						{#if order.cancel_reason}
+							<div class="flex justify-between">
+								<span class="text-gray-500">취소사유</span>
+								<span>{order.cancel_reason}</span>
+							</div>
+						{/if}
 					{/if}
 				</div>
 			{/if}
@@ -249,3 +313,73 @@
 		</div>
 	{/if}
 </div>
+
+<!-- 주문 취소 모달 -->
+{#if showCancelModal}
+	<div
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeCancelModal();
+		}}
+	>
+		<div class="bg-white rounded-lg max-w-md w-full p-6">
+			<h2 class="text-xl font-bold mb-4">주문 취소</h2>
+
+			<p class="text-gray-600 text-sm mb-6">
+				주문을 취소하시겠습니까?<br />
+				취소 사유를 선택해주세요.
+			</p>
+
+			<!-- 취소 사유 선택 -->
+			<div class="space-y-2 mb-4">
+				{#each cancelReasons as reason}
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="radio"
+							name="cancel_reason"
+							value={reason}
+							bind:group={cancelReason}
+							class="w-4 h-4"
+						/>
+						<span class="text-sm">{reason}</span>
+					</label>
+				{/each}
+			</div>
+
+			<!-- 기타 사유 입력 -->
+			{#if cancelReason === '기타'}
+				<div class="mb-4">
+					<textarea
+						bind:value={customReason}
+						placeholder="취소 사유를 입력해주세요"
+						class="input-field resize-none h-24"
+						maxlength="200"
+					></textarea>
+					<p class="text-xs text-gray-500 mt-1 text-right">
+						{customReason.length}/200
+					</p>
+				</div>
+			{/if}
+
+			<!-- 버튼 -->
+			<div class="flex gap-3">
+				<button
+					type="button"
+					onclick={closeCancelModal}
+					disabled={isCancelling}
+					class="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+				>
+					닫기
+				</button>
+				<button
+					type="button"
+					onclick={handleCancelOrder}
+					disabled={isCancelling}
+					class="flex-1 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+				>
+					{isCancelling ? '취소 중...' : '주문 취소'}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

@@ -47,6 +47,8 @@ export interface Order {
 	paid_at?: string;
 	shipped_at?: string;
 	delivered_at?: string;
+	cancelled_at?: string;
+	cancel_reason?: string;
 }
 
 export const orderStatusLabels: Record<OrderStatus, string> = {
@@ -280,4 +282,27 @@ export function formatOrderDateTime(dateString: string): string {
 		hour: '2-digit',
 		minute: '2-digit'
 	});
+}
+
+// 주문 취소
+export async function cancelOrder(orderId: string, reason?: string): Promise<boolean> {
+	const order = mockOrders.find(o => o.id === orderId);
+
+	if (!order) {
+		throw new Error('주문을 찾을 수 없습니다.');
+	}
+
+	if (order.status !== 'PENDING' && order.status !== 'PAID') {
+		throw new Error('취소할 수 없는 주문입니다.');
+	}
+
+	// API 호출 시뮬레이션 (0.5초 대기)
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// Mock 데이터 업데이트
+	order.status = 'CANCELLED';
+	order.cancelled_at = new Date().toISOString();
+	order.cancel_reason = reason;
+
+	return true;
 }
