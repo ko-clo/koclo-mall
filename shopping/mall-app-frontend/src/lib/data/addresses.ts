@@ -73,3 +73,38 @@ export function formatPhoneNumber(phone: string): string {
 	}
 	return phone;
 }
+
+// 배송지 등록
+export async function addAddress(
+	address: Omit<Address, 'id' | 'created_at'>
+): Promise<Address> {
+	// 최대 10개 제한
+	if (mockAddresses.length >= 10) {
+		throw new Error('최대 10개까지 배송지를 등록할 수 있습니다.');
+	}
+
+	// API 호출 시뮬레이션 (0.5초 대기)
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// 첫 배송지인 경우 자동으로 기본 배송지로 설정
+	const isFirst = mockAddresses.length === 0;
+	const isDefault = isFirst ? true : address.is_default;
+
+	// 기본 배송지로 설정하는 경우 기존 기본 배송지 해제
+	if (isDefault) {
+		mockAddresses.forEach(addr => {
+			addr.is_default = false;
+		});
+	}
+
+	const newAddress: Address = {
+		id: `addr-${Date.now()}`,
+		...address,
+		is_default: isDefault,
+		created_at: new Date().toISOString()
+	};
+
+	mockAddresses.push(newAddress);
+
+	return newAddress;
+}
