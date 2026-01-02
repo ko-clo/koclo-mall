@@ -1,5 +1,12 @@
 export type OrderStatus = 'PENDING' | 'PAID' | 'PREPARING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED';
 
+export interface DeliveryTracking {
+	status: 'IN_TRANSIT' | 'OUT_FOR_DELIVERY' | 'DELIVERED';
+	location: string;
+	description: string;
+	timestamp: string;
+}
+
 export interface OrderItem {
 	id: string;
 	product: {
@@ -305,4 +312,78 @@ export async function cancelOrder(orderId: string, reason?: string): Promise<boo
 	order.cancel_reason = reason;
 
 	return true;
+}
+
+// 배송 추적 조회
+export async function getDeliveryTracking(orderId: string): Promise<DeliveryTracking[]> {
+	const order = mockOrders.find(o => o.id === orderId);
+
+	if (!order) {
+		throw new Error('주문을 찾을 수 없습니다.');
+	}
+
+	if (!order.shipping.tracking_number) {
+		throw new Error('운송장 번호가 없습니다.');
+	}
+
+	// API 호출 시뮬레이션 (0.5초 대기)
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// Mock 배송 추적 데이터
+	const mockTracking: Record<string, DeliveryTracking[]> = {
+		'order-1': [
+			{
+				status: 'DELIVERED',
+				location: '서울특별시 강남구',
+				description: '배송완료',
+				timestamp: '2024-12-30T14:00:00Z'
+			},
+			{
+				status: 'OUT_FOR_DELIVERY',
+				location: '서울특별시 강남구 배송센터',
+				description: '배송 출발',
+				timestamp: '2024-12-30T09:30:00Z'
+			},
+			{
+				status: 'IN_TRANSIT',
+				location: '서울 물류센터',
+				description: '배송지로 이동중',
+				timestamp: '2024-12-29T18:00:00Z'
+			},
+			{
+				status: 'IN_TRANSIT',
+				location: '경기 고양 물류센터',
+				description: '간선 상차',
+				timestamp: '2024-12-29T12:00:00Z'
+			},
+			{
+				status: 'IN_TRANSIT',
+				location: '판매자',
+				description: '상품 인수',
+				timestamp: '2024-12-29T09:00:00Z'
+			}
+		],
+		'order-2': [
+			{
+				status: 'OUT_FOR_DELIVERY',
+				location: '경기도 성남시 분당구 배송센터',
+				description: '배송 출발',
+				timestamp: '2024-12-30T10:00:00Z'
+			},
+			{
+				status: 'IN_TRANSIT',
+				location: '경기 성남 물류센터',
+				description: '배송지로 이동중',
+				timestamp: '2024-12-30T08:00:00Z'
+			},
+			{
+				status: 'IN_TRANSIT',
+				location: '판매자',
+				description: '상품 인수',
+				timestamp: '2024-12-30T09:00:00Z'
+			}
+		]
+	};
+
+	return mockTracking[orderId] || [];
 }

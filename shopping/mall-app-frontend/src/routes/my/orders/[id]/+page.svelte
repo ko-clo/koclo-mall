@@ -7,7 +7,9 @@
 		orderStatusColors,
 		formatOrderDateTime,
 		cancelOrder,
-		type Order
+		getDeliveryTracking,
+		type Order,
+		type DeliveryTracking
 	} from '$lib/data/orders';
 	import { formatPrice } from '$lib/data/products';
 	import { toastStore } from '$lib/stores/toast';
@@ -29,6 +31,11 @@
 	let cancelReason = $state('');
 	let customReason = $state('');
 	let isCancelling = $state(false);
+
+	// 배송 추적 모달 상태
+	let showTrackingModal = $state(false);
+	let trackingData = $state<DeliveryTracking[]>([]);
+	let isLoadingTracking = $state(false);
 
 	const cancelReasons = [
 		'단순 변심',
@@ -79,8 +86,42 @@
 		}
 	}
 
-	function handleTrackShipping() {
-		alert('배송 추적 기능은 준비 중입니다.');
+	async function handleTrackShipping() {
+		if (!order) return;
+
+		try {
+			isLoadingTracking = true;
+			showTrackingModal = true;
+			trackingData = await getDeliveryTracking(order.id);
+		} catch (error) {
+			toastStore.error(error instanceof Error ? error.message : '배송 조회에 실패했습니다.');
+			showTrackingModal = false;
+		} finally {
+			isLoadingTracking = false;
+		}
+	}
+
+	function closeTrackingModal() {
+		showTrackingModal = false;
+		trackingData = [];
+	}
+
+	function getTrackingStatusLabel(status: DeliveryTracking['status']): string {
+		const labels = {
+			IN_TRANSIT: '이동중',
+			OUT_FOR_DELIVERY: '배송중',
+			DELIVERED: '배송완료'
+		};
+		return labels[status];
+	}
+
+	function getTrackingStatusIcon(status: DeliveryTracking['status']): string {
+		const icons = {
+			IN_TRANSIT: '🚚',
+			OUT_FOR_DELIVERY: '📦',
+			DELIVERED: '✅'
+		};
+		return icons[status];
 	}
 </script>
 
@@ -380,6 +421,99 @@
 					{isCancelling ? '취소 중...' : '주문 취소'}
 				</button>
 			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- 배송 추적 모달 -->
+{#if showTrackingModal}
+	<div
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeTrackingModal();
+		}}
+	>
+		<div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[80vh] overflow-y-auto">
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-xl font-bold">배송 조회</h2>
+				<button
+					type="button"
+					onclick={closeTrackingModal}
+					class="text-gray-400 hover:text-gray-600"
+				>
+					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+
+			{#if order}
+				<!-- 운송장 정보 -->
+				<div class="bg-gray-50 rounded-lg p-4 mb-6">
+					<div class="grid grid-cols-2 gap-3 text-sm">
+						<div>
+							<span class="text-gray-500">택배사</span>
+							<p class="font-medium">{order.shipping.carrier}</p>
+						</div>
+						<div>
+							<span class="text-gray-500">운송장 번호</span>
+							<p class="font-medium font-mono">{order.shipping.tracking_number}</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- 배송 추적 타임라인 -->
+				{#if isLoadingTracking}
+					<div class="flex items-center justify-center py-12">
+						<div class="text-center">
+							<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black mb-2"></div>
+							<p class="text-gray-500 text-sm">배송 정보를 조회하는 중...</p>
+						</div>
+					</div>
+				{:else if trackingData.length === 0}
+					<div class="text-center py-12">
+						<p class="text-gray-500">배송 추적 정보가 없습니다.</p>
+					</div>
+				{:else}
+					<div class="space-y-4">
+						{#each trackingData as tracking, index}
+							<div class="flex gap-4">
+								<!-- 아이콘 -->
+								<div class="flex-shrink-0">
+									<div
+										class="w-10 h-10 rounded-full flex items-center justify-center text-lg {index === 0
+											? 'bg-black text-white'
+											: 'bg-gray-100'}"
+									>
+										{getTrackingStatusIcon(tracking.status)}
+									</div>
+									{#if index < trackingData.length - 1}
+										<div class="w-0.5 h-12 bg-gray-200 mx-auto mt-2"></div>
+									{/if}
+								</div>
+
+								<!-- 내용 -->
+								<div class="flex-1 pb-4">
+									<div class="flex items-center gap-2 mb-1">
+										<span
+											class="px-2 py-0.5 rounded text-xs font-medium {index === 0
+												? 'bg-black text-white'
+												: 'bg-gray-100 text-gray-600'}"
+										>
+											{getTrackingStatusLabel(tracking.status)}
+										</span>
+										<span class="text-sm text-gray-500">
+											{formatOrderDateTime(tracking.timestamp)}
+										</span>
+									</div>
+									<p class="font-medium">{tracking.description}</p>
+									<p class="text-sm text-gray-500">{tracking.location}</p>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			{/if}
 		</div>
 	</div>
 {/if}
