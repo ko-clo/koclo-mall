@@ -138,3 +138,27 @@ export async function updateAddress(
 
 	return mockAddresses[index];
 }
+
+// 배송지 삭제
+export async function deleteAddress(id: string): Promise<boolean> {
+	const index = mockAddresses.findIndex(addr => addr.id === id);
+
+	if (index === -1) {
+		throw new Error('배송지를 찾을 수 없습니다.');
+	}
+
+	const address = mockAddresses[index];
+
+	// 기본 배송지는 삭제 불가
+	if (address.is_default) {
+		throw new Error('기본 배송지는 삭제할 수 없습니다. 다른 배송지를 기본으로 설정 후 삭제해주세요.');
+	}
+
+	// API 호출 시뮬레이션 (0.5초 대기)
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// 배송지 삭제
+	mockAddresses.splice(index, 1);
+
+	return true;
+}

@@ -1,7 +1,24 @@
 <script lang="ts">
-	import { getAddresses, type Address } from '$lib/data/addresses';
+	import { getAddresses, deleteAddress, type Address } from '$lib/data/addresses';
+	import { toastStore } from '$lib/stores/toast';
 
 	let addresses = $state<Address[]>(getAddresses());
+	let deletingId = $state<string | null>(null);
+
+	async function handleDelete(id: string) {
+		if (!confirm('이 배송지를 삭제하시겠습니까?')) return;
+
+		try {
+			deletingId = id;
+			await deleteAddress(id);
+			addresses = getAddresses();
+			toastStore.success('배송지가 삭제되었습니다.');
+		} catch (error) {
+			toastStore.error(error instanceof Error ? error.message : '배송지 삭제에 실패했습니다.');
+		} finally {
+			deletingId = null;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -64,14 +81,11 @@
 							{#if !address.is_default}
 								<button
 									type="button"
-									class="text-sm text-red-500 hover:text-red-700"
-									onclick={() => {
-										if (confirm('이 배송지를 삭제하시겠습니까?')) {
-											alert('배송지 삭제 기능은 준비 중입니다.');
-										}
-									}}
+									class="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
+									disabled={deletingId === address.id}
+									onclick={() => handleDelete(address.id)}
 								>
-									삭제
+									{deletingId === address.id ? '삭제 중...' : '삭제'}
 								</button>
 							{/if}
 						</div>
