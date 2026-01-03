@@ -108,3 +108,33 @@ export async function addAddress(
 
 	return newAddress;
 }
+
+// 배송지 수정
+export async function updateAddress(
+	id: string,
+	updates: Partial<Omit<Address, 'id' | 'created_at'>>
+): Promise<Address> {
+	const index = mockAddresses.findIndex(addr => addr.id === id);
+
+	if (index === -1) {
+		throw new Error('배송지를 찾을 수 없습니다.');
+	}
+
+	// API 호출 시뮬레이션 (0.5초 대기)
+	await new Promise(resolve => setTimeout(resolve, 500));
+
+	// 기본 배송지로 설정하는 경우 기존 기본 배송지 해제
+	if (updates.is_default) {
+		mockAddresses.forEach(addr => {
+			addr.is_default = false;
+		});
+	}
+
+	// 배송지 업데이트
+	mockAddresses[index] = {
+		...mockAddresses[index],
+		...updates
+	};
+
+	return mockAddresses[index];
+}
