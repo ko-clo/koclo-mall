@@ -1,9 +1,25 @@
 <script lang="ts">
-	import { getAddresses, deleteAddress, type Address } from '$lib/data/addresses';
+	import { getAddresses, deleteAddress, setDefaultAddress, type Address } from '$lib/data/addresses';
 	import { toastStore } from '$lib/stores/toast';
 
 	let addresses = $state<Address[]>(getAddresses());
 	let deletingId = $state<string | null>(null);
+	let settingDefaultId = $state<string | null>(null);
+
+	async function handleSetDefault(id: string) {
+		if (!confirm('이 배송지를 기본 배송지로 설정하시겠습니까?')) return;
+
+		try {
+			settingDefaultId = id;
+			await setDefaultAddress(id);
+			addresses = getAddresses();
+			toastStore.success('기본 배송지가 변경되었습니다.');
+		} catch (error) {
+			toastStore.error(error instanceof Error ? error.message : '기본 배송지 설정에 실패했습니다.');
+		} finally {
+			settingDefaultId = null;
+		}
+	}
 
 	async function handleDelete(id: string) {
 		if (!confirm('이 배송지를 삭제하시겠습니까?')) return;
@@ -115,14 +131,11 @@
 						<div class="mt-4 pt-4 border-t">
 							<button
 								type="button"
-								class="px-4 py-2 border border-black rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-								onclick={() => {
-									if (confirm('이 배송지를 기본 배송지로 설정하시겠습니까?')) {
-										alert('기본 배송지 설정 기능은 준비 중입니다.');
-									}
-								}}
+								class="px-4 py-2 border border-black rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+								disabled={settingDefaultId === address.id}
+								onclick={() => handleSetDefault(address.id)}
 							>
-								기본 배송지로 설정
+								{settingDefaultId === address.id ? '설정 중...' : '기본 배송지로 설정'}
 							</button>
 						</div>
 					{/if}
