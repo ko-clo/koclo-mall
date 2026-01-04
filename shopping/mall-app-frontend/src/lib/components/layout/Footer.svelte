@@ -23,11 +23,22 @@
 					<li><a href="/privacy" class="hover:text-white transition-colors">개인정보처리방침</a></li>
 				</ul>
 			</div>
+			<!-- TODO: SNS 링크를 Admin에서 관리할 수 있도록 개선 필요 -->
 			<div>
 				<h3 class="font-bold mb-4">SNS</h3>
 				<div class="flex gap-4">
-					<a href="#" class="text-gray-400 hover:text-white transition-colors">Instagram</a>
-					<a href="#" class="text-gray-400 hover:text-white transition-colors">YouTube</a>
+					<a
+						href="https://www.instagram.com/koandclo/"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-gray-400 hover:text-white transition-colors"
+					>Instagram</a>
+					<a
+						href="https://www.youtube.com/@KOandCLO"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="text-gray-400 hover:text-white transition-colors"
+					>YouTube</a>
 				</div>
 			</div>
 		</div>
