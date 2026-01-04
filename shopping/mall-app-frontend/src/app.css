@@ -150,6 +150,11 @@
 }
 
 @layer utilities {
+	/* Section Spacing */
+	.section-gap {
+		margin-bottom: 5rem;
+	}
+
 	/* Aspect Ratio */
 	.aspect-product {
 		aspect-ratio: 3 / 4;

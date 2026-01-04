@@ -37,7 +37,9 @@
 
 <header class="border-b bg-white sticky top-0 z-50">
 	<div class="container mx-auto px-4 py-4 flex items-center justify-between">
-		<a href="/" class="text-xl font-bold">ko&clo</a>
+		<a href="/">
+			<img src="/logo.svg" alt="KO&CLO" class="h-8" />
+		</a>
 
 		<nav class="hidden md:flex items-center gap-6">
 			<a href="/products" class="hover:text-gray-600 transition-colors">SHOP</a>

@@ -26,28 +26,32 @@
 			<!-- TODO: SNS 링크를 Admin에서 관리할 수 있도록 개선 필요 -->
 			<div>
 				<h3 class="font-bold mb-4">SNS</h3>
-				<div class="flex gap-4">
-					<a
-						href="https://www.instagram.com/koandclo/"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-gray-400 hover:text-white transition-colors"
-					>Instagram</a>
-					<a
-						href="https://www.youtube.com/@KOandCLO"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="text-gray-400 hover:text-white transition-colors"
-					>YouTube</a>
-				</div>
+				<ul class="space-y-2 text-gray-400 text-sm">
+					<li>
+						<a
+							href="https://www.instagram.com/koandclo/"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="hover:text-white transition-colors"
+						>Instagram</a>
+					</li>
+					<li>
+						<a
+							href="https://www.youtube.com/@KOandCLO"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="hover:text-white transition-colors"
+						>YouTube</a>
+					</li>
+				</ul>
 			</div>
 		</div>
-		<div class="mt-12 pt-8 border-t border-gray-700">
+		<div class="mt-16 pt-8 border-t border-gray-700">
 			<p class="text-gray-400 text-sm">
-				(주) 코앤클로 | 대표: 홍길동 | 사업자등록번호: 123-45-67890
+				(주) 코리안클로딩 | 대표: 김민철 | 사업자등록번호: 279-81-02753
 			</p>
 			<p class="text-gray-400 text-sm mt-1">
-				주소: 서울특별시 강남구 테헤란로 123
+				주소: 부산광역시 부산진구 중앙대로702번길 50, 1층
 			</p>
 			<p class="text-gray-500 text-sm mt-4">
 				&copy; 2025 ko&clo. All rights reserved.
