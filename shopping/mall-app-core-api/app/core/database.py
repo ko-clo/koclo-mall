@@ -14,9 +14,10 @@ class Base(DeclarativeBase):
 
 
 engine = create_async_engine(
-    settings.database_url,
+    settings.database_url_encoded,
     echo=settings.debug,
     pool_pre_ping=True,
+    connect_args={"statement_cache_size": 0},  # Transaction Pooler 호환
 )
 
 async_session_maker = async_sessionmaker(

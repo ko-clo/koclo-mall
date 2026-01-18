@@ -15,8 +15,8 @@ from app.features.member.member_pdschema import (
     PasswordResetRequest,
     SignupRequest,
     SignupResponse,
-    SocialLoginResponse,
-    SocialMemberUpsertRequest,
+    MemberConnectResponse,
+    MemberConnectRequest,
     WithdrawCheckResponse,
     WithdrawRequest,
 )
@@ -28,7 +28,7 @@ from app.features.member.member_singleton import (
     record_login_usecase,
     request_password_reset_usecase,
     signup_usecase,
-    social_login_usecase,
+    connect_member_usecase,
     update_profile_usecase,
     withdraw_usecase,
 )
@@ -57,7 +57,7 @@ async def get_current_profile(
     """현재 로그인된 회원 프로필."""
     profile = await get_profile_usecase.execute(token.sub)
     if not profile:
-        raise BadRequestException("회원 정보를 찾을 수 없습니다")
+        raise BadRequestException("회원 연결이 필요합니다", code="MEMBER_NOT_CONNECTED")
     return profile
 
 
@@ -85,13 +85,13 @@ async def signup(data: SignupRequest) -> SignupResponse:
     return await signup_usecase.execute(data)
 
 
-@router.post("/members", response_model=SocialLoginResponse, status_code=201)
-async def upsert_social_member(
-    data: SocialMemberUpsertRequest,
+@router.post("/members/connect", response_model=MemberConnectResponse, status_code=201)
+async def connect_member(
+    data: MemberConnectRequest,
     token: Annotated[TokenPayload, Depends(get_token)],
-) -> SocialLoginResponse:
-    """소셜 로그인 시 회원 UPSERT."""
-    return await social_login_usecase.execute(
+) -> MemberConnectResponse:
+    """소셜 로그인 후 회원 연결."""
+    return await connect_member_usecase.execute(
         user_id=token.sub,
         email=token.email or "",
         data=data,

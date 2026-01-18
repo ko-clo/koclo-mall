@@ -21,12 +21,10 @@ services:
     container_name: mall-api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql+asyncpg://mall:mall_dev_password@db:5432/mall_dev
       - DEBUG=true
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - ./app:/app/app
 

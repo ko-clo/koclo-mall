@@ -11,6 +11,9 @@ __all__ = [
     "AgreementsSchema",
     "SignupRequest",
     "SignupResponse",
+    # 회원 연결
+    "MemberConnectRequest",
+    "MemberConnectResponse",
     # 소셜 로그인
     "SocialMemberUpsertRequest",
     "SocialLoginResponse",
@@ -41,14 +44,11 @@ class AgreementsSchema(BaseModel):
 
 
 class SignupRequest(BaseModel):
-    """이메일 회원가입 요청."""
+    """이메일 회원가입 요청 (Supabase 계정 생성만)."""
 
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=20)
     password_confirm: str = Field(..., alias="passwordConfirm")
-    name: str = Field(..., min_length=2, max_length=50)
-    phone: str | None = Field(None, pattern=r"^\+82\d{9,10}$")
-    agreements: AgreementsSchema
 
     @field_validator("password")
     @classmethod
@@ -62,14 +62,6 @@ class SignupRequest(BaseModel):
             raise ValueError("특수문자를 포함해야 합니다")
         return v
 
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        """한글 또는 영문만."""
-        if not re.match(r"^[가-힣a-zA-Z\s]+$", v):
-            raise ValueError("이름은 한글 또는 영문만 가능합니다")
-        return v
-
 
 class SignupResponse(BaseModel):
     """회원가입 응답."""
@@ -77,6 +69,36 @@ class SignupResponse(BaseModel):
     id: str
     email: str
     message: str = "인증 이메일을 확인하세요"
+
+
+# ============================================================
+# 회원 연결 (MBR-001)
+# ============================================================
+
+
+class MemberConnectRequest(BaseModel):
+    """이메일 인증 후 또는 소셜 로그인 후 회원 연결 요청."""
+
+    agreements: AgreementsSchema
+    name: str | None = Field(None, min_length=2, max_length=50)
+    phone: str | None = Field(None, pattern=r"^\+82\d{9,10}$")
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        """한글 또는 영문만."""
+        if v and not re.match(r"^[가-힣a-zA-Z\s]+$", v):
+            raise ValueError("이름은 한글 또는 영문만 가능합니다")
+        return v
+
+
+class MemberConnectResponse(BaseModel):
+    """회원 연결 응답."""
+
+    id: str
+    email: str
+    status: str
+    is_new: bool = Field(..., serialization_alias="isNew")
 
 
 # ============================================================

@@ -11,7 +11,10 @@ from app.core.database import Base
 from app.features.member import Member, MemberProfile  # noqa: F401
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# configparser는 %를 interpolation으로 해석하므로 %%로 이스케이프
+config.set_main_option(
+    "sqlalchemy.url", settings.database_url_encoded.replace("%", "%%")
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -46,6 +49,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"statement_cache_size": 0},  # Transaction Pooler 호환
     )
 
     async with connectable.connect() as connection:

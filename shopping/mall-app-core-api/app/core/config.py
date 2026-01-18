@@ -1,3 +1,5 @@
+from urllib.parse import quote_plus, urlparse, urlunparse
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +12,18 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "postgresql+asyncpg://mall:mall_dev_password@localhost:5432/mall_dev"
+
+    @property
+    def database_url_encoded(self) -> str:
+        """URL-encoded database URL (특수문자 처리)."""
+        parsed = urlparse(self.database_url)
+        if parsed.password:
+            encoded_password = quote_plus(parsed.password)
+            netloc = f"{parsed.username}:{encoded_password}@{parsed.hostname}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+            return urlunparse(parsed._replace(netloc=netloc))
+        return self.database_url
 
     # CORS
     cors_origins: list[str] = ["http://localhost:5173"]

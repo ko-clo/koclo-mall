@@ -8,6 +8,8 @@ from app.core.exceptions import BadRequestException, ConflictException
 from app.core.security import create_token, decode_token
 from app.features.member.member_model import MemberStatus
 from app.features.member.member_pdschema import (
+    MemberConnectRequest,
+    MemberConnectResponse,
     MemberProfileResponse,
     MemberProfileUpdate,
     PasswordChangeRequest,
@@ -34,17 +36,10 @@ class MemberService:
     # MBR-001: 회원가입
     # ============================================================
 
-    @with_session
     async def signup(self, data: SignupRequest) -> SignupResponse:
-        """이메일 회원가입."""
-        if not data.agreements.terms or not data.agreements.privacy:
-            raise BadRequestException("필수 약관에 동의해야 합니다", code="TERMS_NOT_AGREED")
-
+        """이메일 회원가입 (Supabase 계정 생성만)."""
         if data.password != data.password_confirm:
             raise BadRequestException("비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH")
-
-        if await self._provider.exists_by_email(data.email):
-            raise ConflictException("이미 가입된 이메일입니다", code="EMAIL_ALREADY_EXISTS")
 
         try:
             auth_response = self._supabase.auth.sign_up({
@@ -60,25 +55,52 @@ class MemberService:
         if not user:
             raise BadRequestException("회원가입 처리 중 오류가 발생했습니다")
 
+        return SignupResponse(id=str(user.id), email=data.email)
+
+    @with_session
+    async def connect(
+        self,
+        user_id: UUID,
+        email: str,
+        data: MemberConnectRequest,
+    ) -> MemberConnectResponse:
+        """이메일 인증 후 또는 소셜 로그인 후 회원 연결."""
+        if not data.agreements.terms or not data.agreements.privacy:
+            raise BadRequestException("필수 약관에 동의해야 합니다", code="TERMS_NOT_AGREED")
+
         now = datetime.now(timezone.utc)
-        user_id = UUID(user.id)
+        member = await self._provider.find_by_id(user_id)
 
-        await self._provider.create_member(
-            member_id=user_id,
-            status=MemberStatus.PENDING,
-            marketing_agreed=data.agreements.marketing,
-            terms_agreed_at=now,
-            privacy_agreed_at=now,
+        if member:
+            # 기존 회원 - 로그인 기록만 업데이트
+            updates = {"last_login_at": now}
+            if member.status == MemberStatus.DORMANT:
+                updates["status"] = MemberStatus.ACTIVE
+            await self._provider.update_member(member, **updates)
+            is_new = False
+        else:
+            # 신규 회원 - 생성
+            member = await self._provider.create_member(
+                member_id=user_id,
+                status=MemberStatus.ACTIVE,
+                marketing_agreed=data.agreements.marketing,
+                terms_agreed_at=now,
+                privacy_agreed_at=now,
+            )
+            await self._provider.create_profile(
+                member_id=user_id,
+                email=email,
+                name=data.name or email.split("@")[0],
+                phone=data.phone,
+            )
+            is_new = True
+
+        return MemberConnectResponse(
+            id=str(member.id),
+            email=email,
+            status=member.status.value,
+            is_new=is_new,
         )
-
-        await self._provider.create_profile(
-            member_id=user_id,
-            email=data.email,
-            name=data.name,
-            phone=data.phone,
-        )
-
-        return SignupResponse(id=str(user_id), email=data.email)
 
     @with_session
     async def upsert_social_member(

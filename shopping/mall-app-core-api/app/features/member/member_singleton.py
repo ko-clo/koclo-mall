@@ -7,13 +7,13 @@ from app.features.member.member_provider import MemberProvider
 from app.features.member.member_service import MemberService
 from app.features.member.usecases import (
     ConfirmPasswordResetUseCase,
+    ConnectMemberUseCase,
     GetProfileUseCase,
     GetWithdrawCheckUseCase,
     PasswordChangeUseCase,
     RecordLoginUseCase,
     RequestPasswordResetUseCase,
     SignupUseCase,
-    SocialLoginUseCase,
     UpdateProfileUseCase,
     WithdrawUseCase,
 )
@@ -25,7 +25,7 @@ member_service = MemberService(member_provider, supabase_client)
 
 # UseCases
 signup_usecase = SignupUseCase(member_service)
-social_login_usecase = SocialLoginUseCase(member_service)
+connect_member_usecase = ConnectMemberUseCase(member_service)
 record_login_usecase = RecordLoginUseCase(member_service)
 request_password_reset_usecase = RequestPasswordResetUseCase(member_service)
 confirm_password_reset_usecase = ConfirmPasswordResetUseCase(member_service)
