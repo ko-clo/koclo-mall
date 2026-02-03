@@ -20,6 +20,4 @@ class WithdrawUseCase:
         withdraw_token: str,
     ) -> None:
         """회원 탈퇴 실행."""
-        await self._service.withdraw(
-            member_id, email, reason, password, withdraw_token
-        )
+        await self._service.withdraw(member_id, email, reason, password, withdraw_token)

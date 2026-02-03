@@ -2,7 +2,10 @@
 
 from uuid import UUID
 
-from app.features.member.member_pdschema import MemberConnectRequest, MemberConnectResponse
+from app.features.member.member_pdschema import (
+    MemberConnectRequest,
+    MemberConnectResponse,
+)
 from app.features.member.member_service import MemberService
 
 

@@ -7,7 +7,9 @@ os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
 os.environ.setdefault("SUPABASE_ANON_KEY", "test-anon-key")
 os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-key-for-testing-purposes-only")
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5432/test")
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5432/test"
+)
 
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -24,7 +26,11 @@ from app.features.member.member_pdschema import (
 )
 from app.features.member.member_service import MemberService
 
-from tests.conftest import MockSupabaseAuthResponse, MockSupabaseUser, create_mock_member
+from tests.conftest import (
+    MockSupabaseAuthResponse,
+    MockSupabaseUser,
+    create_mock_member,
+)
 
 
 # ============================================================
@@ -60,10 +66,12 @@ class TestSignup:
         assert result.id == user_id
         assert result.email == "test@example.com"
         assert result.message == "인증 이메일을 확인하세요"
-        mock_supabase.auth.sign_up.assert_called_once_with({
-            "email": "test@example.com",
-            "password": "Test1234!",
-        })
+        mock_supabase.auth.sign_up.assert_called_once_with(
+            {
+                "email": "test@example.com",
+                "password": "Test1234!",
+            }
+        )
 
     async def test_signup_password_mismatch(
         self,
@@ -341,7 +349,9 @@ class TestChangePassword:
         mock_supabase: MagicMock,
     ):
         """현재 비밀번호 틀림."""
-        mock_supabase.auth.sign_in_with_password.side_effect = Exception("Invalid credentials")
+        mock_supabase.auth.sign_in_with_password.side_effect = Exception(
+            "Invalid credentials"
+        )
 
         data = MagicMock()
         data.new_password = "NewPass1!"

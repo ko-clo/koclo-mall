@@ -131,7 +131,9 @@ async def reset_password(
 ) -> dict:
     """비밀번호 재설정."""
     if data.password != data.password_confirm:
-        raise BadRequestException("비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH")
+        raise BadRequestException(
+            "비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH"
+        )
     await confirm_password_reset_usecase.execute(token.sub, data.password)
     return {"message": "비밀번호가 변경되었습니다"}
 

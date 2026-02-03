@@ -42,10 +42,14 @@ class Member(Base):
     marketing_agreed: Mapped[bool] = mapped_column(Boolean, default=False)
     terms_agreed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     privacy_agreed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # 탈퇴 정보
-    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     withdrawal_reason: Mapped[str | None] = mapped_column(String(20), nullable=True)
     personal_info_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 

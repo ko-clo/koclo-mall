@@ -19,7 +19,9 @@ from app.features.member.usecases import (
 )
 
 # Singletons
-supabase_client = create_client(settings.supabase_url, settings.supabase_service_role_key)
+supabase_client = create_client(
+    settings.supabase_url, settings.supabase_service_role_key
+)
 member_provider = MemberProvider()
 member_service = MemberService(member_provider, supabase_client)
 

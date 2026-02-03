@@ -24,15 +24,15 @@ from datetime import datetime
 
 # PRD 파일 순서 정의
 PRD_FILES = [
-    "Shopping_Mall_PRD.md",    # 1. 개요/목차
-    "MBR_회원관리.md",          # 2. 회원관리
-    "PRD_상품관리.md",          # 3. 상품관리
-    "CART_장바구니.md",         # 4. 장바구니
-    "ORD_주문결제.md",          # 5. 주문결제
-    "ADDR_배송지관리.md",       # 6. 배송지관리
-    "SHP_배송.md",             # 7. 배송
-    "PROMO_프로모션.md",        # 8. 프로모션
-    "CS_고객센터.md",           # 9. 고객센터
+    "Shopping_Mall_PRD.md",  # 1. 개요/목차
+    "MBR_회원관리.md",  # 2. 회원관리
+    "PRD_상품관리.md",  # 3. 상품관리
+    "CART_장바구니.md",  # 4. 장바구니
+    "ORD_주문결제.md",  # 5. 주문결제
+    "ADDR_배송지관리.md",  # 6. 배송지관리
+    "SHP_배송.md",  # 7. 배송
+    "PROMO_프로모션.md",  # 8. 프로모션
+    "CS_고객센터.md",  # 9. 고객센터
 ]
 
 
@@ -44,7 +44,7 @@ def check_dependencies():
     try:
         result = subprocess.run(["pandoc", "--version"], capture_output=True, text=True)
         if result.returncode == 0:
-            version = result.stdout.split('\n')[0]
+            version = result.stdout.split("\n")[0]
             print(f"  ✓ {version}")
     except FileNotFoundError:
         missing.append("pandoc (brew install pandoc)")
@@ -69,10 +69,7 @@ def check_dependencies():
 def render_mermaid_to_png(mermaid_code: str, output_path: Path) -> bool:
     """Mermaid 코드를 PNG 이미지로 렌더링"""
     with tempfile.NamedTemporaryFile(
-        mode='w',
-        suffix='.mmd',
-        encoding='utf-8',
-        delete=False
+        mode="w", suffix=".mmd", encoding="utf-8", delete=False
     ) as f:
         f.write(mermaid_code)
         temp_mmd = f.name
@@ -81,15 +78,20 @@ def render_mermaid_to_png(mermaid_code: str, output_path: Path) -> bool:
         result = subprocess.run(
             [
                 "mmdc",
-                "-i", temp_mmd,
-                "-o", str(output_path),
-                "-b", "white",           # 흰색 배경
-                "-t", "default",         # 기본 테마
-                "-s", "2",               # 스케일 2x (고해상도)
+                "-i",
+                temp_mmd,
+                "-o",
+                str(output_path),
+                "-b",
+                "white",  # 흰색 배경
+                "-t",
+                "default",  # 기본 테마
+                "-s",
+                "2",  # 스케일 2x (고해상도)
             ],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
         return result.returncode == 0 and output_path.exists()
     except Exception as e:
@@ -101,7 +103,7 @@ def render_mermaid_to_png(mermaid_code: str, output_path: Path) -> bool:
 
 def process_mermaid_blocks(content: str, images_dir: Path, file_prefix: str) -> str:
     """Mermaid 블록을 이미지로 변환하고 마크다운 참조로 대체"""
-    pattern = r'```mermaid\n(.*?)```'
+    pattern = r"```mermaid\n(.*?)```"
     diagram_count = 0
 
     def replace_with_image(match):
@@ -134,13 +136,15 @@ def merge_prd_files(prd_dir: Path, images_dir: Path) -> str:
     merged_content = []
 
     # 헤더 추가
-    merged_content.append(f"""---
+    merged_content.append(
+        f"""---
 title: "Ko & Clo 쇼핑몰 PRD (Product Requirements Document)"
 author: "ko&clo Project"
 date: "{datetime.now().strftime('%Y-%m-%d')}"
 ---
 
-""")
+"""
+    )
 
     for i, filename in enumerate(PRD_FILES):
         filepath = prd_dir / filename
@@ -151,7 +155,7 @@ date: "{datetime.now().strftime('%Y-%m-%d')}"
 
         print(f"  ✓ {filename}", end="", flush=True)
 
-        content = filepath.read_text(encoding='utf-8')
+        content = filepath.read_text(encoding="utf-8")
 
         # 파일명에서 prefix 추출 (확장자 제외)
         file_prefix = filepath.stem
@@ -181,10 +185,7 @@ def generate_docx(merged_md: str, output_path: Path, images_dir: Path):
 
     # 임시 마크다운 파일 생성
     with tempfile.NamedTemporaryFile(
-        mode='w',
-        suffix='.md',
-        encoding='utf-8',
-        delete=False
+        mode="w", suffix=".md", encoding="utf-8", delete=False
     ) as f:
         f.write(merged_md)
         temp_md_path = f.name
@@ -194,11 +195,15 @@ def generate_docx(merged_md: str, output_path: Path, images_dir: Path):
         cmd = [
             "pandoc",
             temp_md_path,
-            "-o", str(output_path),
-            "--from", "markdown",
-            "--to", "docx",
+            "-o",
+            str(output_path),
+            "--from",
+            "markdown",
+            "--to",
+            "docx",
             "--standalone",
-            "--resource-path", str(images_dir),
+            "--resource-path",
+            str(images_dir),
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)

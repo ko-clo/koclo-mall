@@ -15,9 +15,7 @@ class MemberProvider:
     async def find_by_id(self, member_id: UUID) -> Member | None:
         """ID로 회원 조회."""
         session = get_session()
-        result = await session.execute(
-            select(Member).where(Member.id == member_id)
-        )
+        result = await session.execute(select(Member).where(Member.id == member_id))
         return result.scalar_one_or_none()
 
     async def find_by_email(self, email: str) -> MemberProfile | None:

@@ -7,7 +7,9 @@ os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
 os.environ.setdefault("SUPABASE_ANON_KEY", "test-anon-key")
 os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-key-for-testing-purposes-only")
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5432/test")
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://test:test@localhost:5432/test"
+)
 
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -129,6 +131,8 @@ def mock_provider() -> MagicMock:
 
 
 @pytest.fixture
-def member_service(mock_provider: MagicMock, mock_supabase: MockSupabaseClient) -> MemberService:
+def member_service(
+    mock_provider: MagicMock, mock_supabase: MockSupabaseClient
+) -> MemberService:
     """MemberService fixture with mocked dependencies."""
     return MemberService(mock_provider, mock_supabase)

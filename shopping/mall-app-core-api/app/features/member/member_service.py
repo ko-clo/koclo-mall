@@ -39,16 +39,22 @@ class MemberService:
     async def signup(self, data: SignupRequest) -> SignupResponse:
         """이메일 회원가입 (Supabase 계정 생성만)."""
         if data.password != data.password_confirm:
-            raise BadRequestException("비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH")
+            raise BadRequestException(
+                "비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH"
+            )
 
         try:
-            auth_response = self._supabase.auth.sign_up({
-                "email": data.email,
-                "password": data.password,
-            })
+            auth_response = self._supabase.auth.sign_up(
+                {
+                    "email": data.email,
+                    "password": data.password,
+                }
+            )
         except Exception as e:
             if "already registered" in str(e).lower():
-                raise ConflictException("이미 가입된 이메일입니다", code="EMAIL_ALREADY_EXISTS")
+                raise ConflictException(
+                    "이미 가입된 이메일입니다", code="EMAIL_ALREADY_EXISTS"
+                )
             raise BadRequestException(f"회원가입 실패: {e}")
 
         user = auth_response.user
@@ -66,7 +72,9 @@ class MemberService:
     ) -> MemberConnectResponse:
         """이메일 인증 후 또는 소셜 로그인 후 회원 연결."""
         if not data.agreements.terms or not data.agreements.privacy:
-            raise BadRequestException("필수 약관에 동의해야 합니다", code="TERMS_NOT_AGREED")
+            raise BadRequestException(
+                "필수 약관에 동의해야 합니다", code="TERMS_NOT_AGREED"
+            )
 
         now = datetime.now(timezone.utc)
         member = await self._provider.find_by_id(user_id)
@@ -180,15 +188,21 @@ class MemberService:
     ) -> None:
         """비밀번호 변경."""
         if data.new_password != data.new_password_confirm:
-            raise BadRequestException("새 비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH")
+            raise BadRequestException(
+                "새 비밀번호가 일치하지 않습니다", code="PASSWORD_MISMATCH"
+            )
 
         try:
-            self._supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": data.current_password,
-            })
+            self._supabase.auth.sign_in_with_password(
+                {
+                    "email": email,
+                    "password": data.current_password,
+                }
+            )
         except Exception:
-            raise BadRequestException("현재 비밀번호가 일치하지 않습니다", code="WRONG_PASSWORD")
+            raise BadRequestException(
+                "현재 비밀번호가 일치하지 않습니다", code="WRONG_PASSWORD"
+            )
 
         try:
             self._supabase.auth.admin.update_user_by_id(
@@ -241,7 +255,9 @@ class MemberService:
             await self._provider.update_profile(member.profile, **profile_updates)
 
         if data.marketing_agreed is not None:
-            await self._provider.update_member(member, marketing_agreed=data.marketing_agreed)
+            await self._provider.update_member(
+                member, marketing_agreed=data.marketing_agreed
+            )
 
         return MemberProfileResponse(
             id=member.id,
@@ -294,18 +310,26 @@ class MemberService:
         """회원 탈퇴."""
         payload = decode_token(withdraw_token)
         if payload.get("purpose") != "withdraw":
-            raise BadRequestException("유효하지 않은 탈퇴 토큰입니다", code="INVALID_WITHDRAW_TOKEN")
+            raise BadRequestException(
+                "유효하지 않은 탈퇴 토큰입니다", code="INVALID_WITHDRAW_TOKEN"
+            )
         if payload.get("sub") != str(member_id):
-            raise BadRequestException("유효하지 않은 탈퇴 토큰입니다", code="INVALID_WITHDRAW_TOKEN")
+            raise BadRequestException(
+                "유효하지 않은 탈퇴 토큰입니다", code="INVALID_WITHDRAW_TOKEN"
+            )
 
         if password:
             try:
-                self._supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": password,
-                })
+                self._supabase.auth.sign_in_with_password(
+                    {
+                        "email": email,
+                        "password": password,
+                    }
+                )
             except Exception:
-                raise BadRequestException("비밀번호가 일치하지 않습니다", code="WRONG_PASSWORD")
+                raise BadRequestException(
+                    "비밀번호가 일치하지 않습니다", code="WRONG_PASSWORD"
+                )
 
         member = await self._provider.find_by_id(member_id)
         if not member:

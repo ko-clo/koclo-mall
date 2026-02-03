@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database
-    database_url: str = "postgresql+asyncpg://mall:mall_dev_password@localhost:5432/mall_dev"
+    database_url: str = (
+        "postgresql+asyncpg://mall:mall_dev_password@localhost:5432/mall_dev"
+    )
 
     @property
     def database_url_encoded(self) -> str:

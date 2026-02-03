@@ -26,7 +26,9 @@ async_session_maker = async_sessionmaker(
     expire_on_commit=False,
 )
 
-_current_session: ContextVar[AsyncSession | None] = ContextVar("current_session", default=None)
+_current_session: ContextVar[AsyncSession | None] = ContextVar(
+    "current_session", default=None
+)
 
 
 def get_session() -> AsyncSession:

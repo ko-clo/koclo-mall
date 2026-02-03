@@ -152,4 +152,6 @@ def decode_token(token: str) -> dict:
             algorithms=["HS256"],
         )
     except JWTError as e:
-        raise BadRequestException("유효하지 않은 토큰입니다", code="INVALID_TOKEN") from e
+        raise BadRequestException(
+            "유효하지 않은 토큰입니다", code="INVALID_TOKEN"
+        ) from e
