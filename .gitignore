@@ -1,0 +1,39 @@
+# ===========================================
+# shopping/mall-app-frontend (SvelteKit)
+# ===========================================
+shopping/mall-app-frontend/node_modules/
+shopping/mall-app-frontend/.svelte-kit/
+shopping/mall-app-frontend/build/
+shopping/mall-app-frontend/.vercel/
+shopping/mall-app-frontend/.netlify/
+shopping/mall-app-frontend/package-lock.json
+
+# ===========================================
+# shopping/mall-app-core-api (FastAPI/Pydantic/SQLAlchemy)
+# ===========================================
+shopping/mall-app-core-api/__pycache__/
+shopping/mall-app-core-api/.venv/
+shopping/mall-app-core-api/venv/
+shopping/mall-app-core-api/.env
+shopping/mall-app-core-api/.env.local
+shopping/mall-app-core-api/*.db
+shopping/mall-app-core-api/*.sqlite3
+
+# Alembic
+shopping/mall-app-core-api/alembic/versions/*.pyc
+
+# pytest
+shopping/mall-app-core-api/.pytest_cache/
+shopping/mall-app-core-api/htmlcov/
+shopping/mall-app-core-api/.coverage
+
+# mypy/ruff
+shopping/mall-app-core-api/.mypy_cache/
+shopping/mall-app-core-api/.ruff_cache/
+
+# IDE
+shopping/mall-app-core-api/.idea/
+shopping/mall-app-core-api/.vscode/
+
+# Python
+__pycache__/
